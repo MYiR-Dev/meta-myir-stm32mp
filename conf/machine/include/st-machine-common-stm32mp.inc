@@ -256,7 +256,7 @@ UBOOT_ENTRYPOINT = "0xC4000000"
 # List of device tree to install
 KERNEL_DEVICETREE ?= "${STM32MP_KERNEL_DEVICETREE}"
 KERNEL_SUB_PATH = ""
-KERNEL_SUB_PATH:aarch64 = "st/"
+KERNEL_SUB_PATH:aarch64 = "myir/"
 
 STM32MP_KERNEL_DEVICETREE += "${@' '.join('${KERNEL_SUB_PATH}%s.dtb' % d for d in '${STM32MP_DEVICETREE}'.split())}"
 STM32MP_KERNEL_DEVICETREE += "${@' '.join('${KERNEL_SUB_PATH}%s.dtb' % d for d in '${CUBE_M4_EXAMPLES_DT}'.split())}"
