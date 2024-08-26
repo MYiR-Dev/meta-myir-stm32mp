@@ -19,6 +19,6 @@ do_install() {
 
 SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE_${PN} = "eeprom-pnsn.service"
-SYSTEMD_AUTO_ENABLE_hmi = "enable"
+SYSTEMD_AUTO_ENABLE_${PN} = "enable"
 
 FILES:${PN} += "/"

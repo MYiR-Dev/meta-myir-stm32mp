@@ -9,6 +9,8 @@ SRC_URI += " \
 		file://bcmd  \
  		file://usr/bin/ \
 		file://usr/lib/libmyir_code.so.1 \ 
+		file://10-static-eth0.network \
+		file://11-static-eth1.network \
 		file://LICENSE \
 "
 S="${WORKDIR}"
@@ -20,7 +22,10 @@ do_install() {
 	install -d ${D}/etc/myir_test/
 	install -d ${D}/etc/
 	install -d ${D}/usr/lib
+	install -d ${D}/${sysconfdir}/systemd/network/
 
+	install -m 755 ${S}/10-static-eth0.network  ${D}/${sysconfdir}/systemd/network/
+	install -m 755 ${S}/11-static-eth1.network  ${D}/${sysconfdir}/systemd/network/
         install -m 755 ${S}/etc/myir_test/* ${D}/etc/myir_test/ 
         install -m 755 ${S}/etc/hostapd.conf ${D}/etc/hostapd.conf 
         install -m 755 ${S}/etc/udhcpd.conf ${D}/etc/udhcpd.conf
@@ -37,6 +42,7 @@ FILES:${PN} =" ${bindir}   \
 	      /etc/myir_test/ \
 	      /etc/ \
 	      /usr/lib \
+	     ${sysconfdir}/systemd/network/ \
 "
 FILES_${PN} += "${libdir}/*.so.1"
 FILES_${PN}-dbg += "${libdir}/.debug"
