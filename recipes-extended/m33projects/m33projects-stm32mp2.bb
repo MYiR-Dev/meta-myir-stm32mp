@@ -13,16 +13,21 @@ S = "${WORKDIR}/git"
 
 require recipes-extended/m33projects/m33projects.inc
 
+#PROJECTS_LIST = " \
+#    STM32MP257F-EV1/Demonstrations/USBPD_DRP_UCSI \
+#    STM32MP257F-DK/Demonstrations/USBPD_DRP_UCSI \
+#"
 PROJECTS_LIST = " \
-    STM32MP257F-EV1/Demonstrations/USBPD_DRP_UCSI \
     STM32MP257F-DK/Demonstrations/USBPD_DRP_UCSI \
 "
 
 # WARNING: You MUST put only one project on DEFAULT_COPRO_FIRMWARE per board
 # If there is several project defined for the same board while you MUST have issue at runtime
 # (not the correct project could be executed).
-DEFAULT_COPRO_FIRMWARE = "STM32MP257F-EV1/Demonstrations/USBPD_DRP_UCSI"
+#DEFAULT_COPRO_FIRMWARE = "STM32MP257F-EV1/Demonstrations/USBPD_DRP_UCSI"
+#DEFAULT_COPRO_FIRMWARE = "STM32MP257F-EV1/Applications/FreeRTOS/FreeRTOS_MsgQueue"
 DEFAULT_COPRO_FIRMWARE += "STM32MP257F-DK/Demonstrations/USBPD_DRP_UCSI"
+#DEFAULT_COPRO_FIRMWARE += "STM32MP257F-DK/Examples/I2C/I2C_TwoBoards_ComIT"
 
 # Define default board reference for M33
 M33_BOARDS += " STM32MP257F-EV1 STM32MP257F-DK"
