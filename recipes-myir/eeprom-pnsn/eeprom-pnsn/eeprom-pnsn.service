@@ -1,6 +1,6 @@
 [Unit]
 Description=Temperature Control Service
-After=network.target
+After=tee-supplicant.service
 
 [Service]
 Type=simple
