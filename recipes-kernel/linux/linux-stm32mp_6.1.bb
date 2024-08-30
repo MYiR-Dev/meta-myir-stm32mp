@@ -16,8 +16,8 @@ KERNEL_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-linux.git;protocol=https"
 SRC_URI = "${KERNEL_SRC_URI};branch=develop-ld25x-6.1.82"
 
 #SRC_URI[kernel.sha256sum] = "d150d2d9d416877668d8b56f75759f166168d192419eefaa942ed67225cbec06"
-#SRCREV = "55c59ea1a2c4247b09be93bcecf73652e51997ea"
-SRCREV= "${AUTOREV}"
+SRCREV = "c56c7cf4effadfc7f84f250eba4f5346f385383f"
+#SRCREV= "${AUTOREV}"
 #SRC_URI += " \
 #    file://${LINUX_VERSION}/${LINUX_VERSION}${LINUX_SUBVERSION}/0001-v6.1-stm32mp-r2.patch \
 #    "
