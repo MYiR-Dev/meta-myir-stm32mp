@@ -12,12 +12,14 @@ DEPENDS += "dtc-native bc-native"
 DEPENDS += "flex-native bison-native"
 DEPENDS += "python3-setuptools-native"
 
-SRC_URI = "git://github.com/u-boot/u-boot.git;protocol=https;branch=master"
-SRCREV  = "4debc57a3da6c3f4d3f89a637e99206f4cea0a96"
+#SRC_URI = "git://github.com/u-boot/u-boot.git;protocol=https;branch=master"
+UBOOT_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-u-boot.git;protocol=https"
+SRC_URI = "${UBOOT_SRC_URI};branch=develop-ld25x-v2022.10"
+SRCREV= "${AUTOREV}"
 
-SRC_URI += "\
-    file://0001-v2022.10-stm32mp-r2.patch \
-"
+#SRC_URI += "\
+#    file://0001-v2022.10-stm32mp-r2.patch \
+#"
 
 # debug and trace
 SRC_URI:append = " ${@bb.utils.contains('ST_UBOOT_DEBUG_TRACE', '1', '', 'file://0098-silent_mode.patch', d)} "
@@ -46,6 +48,7 @@ S = "${WORKDIR}/git"
 # ---------------------------------
 BBCLASSEXTEND = "devupstream:target"
 
+#SRC_URI:class-devupstream = "git://github.com/STMicroelectronics/u-boot.git;protocol=https;branch=${ARCHIVER_ST_BRANCH}"
 SRC_URI:class-devupstream = "git://github.com/STMicroelectronics/u-boot.git;protocol=https;branch=${ARCHIVER_ST_BRANCH}"
 SRCREV:class-devupstream = "262bcb6906d46aa2265be284b0b625eb2e0b674e"
 

@@ -6,12 +6,14 @@ LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://license.rst;md5=1dd070c98a281d18d9eefd938729b031"
 CVE_PRODUCT = "arm:trusted_firmware-a"
 
-SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;branch=lts-v2.8"
-SRCREV = "567af710d8e1fa7b874f6643e4671555a60db123"
+#SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;branch=lts-v2.8"
+TFA_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-arm-trusted-firmware.git;protocol=https"
+SRC_URI = "${TFA_SRC_URI};branch=develop-ld25x-v2.8.15"
+SRCREV= "${AUTOREV}"
 
-SRC_URI += " \
-    file://0001-v2.8-stm32mp-r2.patch \
-    "
+#SRC_URI += " \
+#    file://0001-v2.8-stm32mp-r2.patch \
+#    "
 
 TF_A_VERSION = "v2.8"
 TF_A_SUBVERSION = ".15"
