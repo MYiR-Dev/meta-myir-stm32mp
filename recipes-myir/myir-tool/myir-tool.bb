@@ -10,8 +10,8 @@ SRC_URI += " \
  		file://usr/bin/ \
 		file://usr/lib/libmyir_code.so.1 \ 
 		file://usr/lib/locale/ \ 
-		file://10-static-eth0.network \
-		file://11-static-eth1.network \
+		file://10-static-end1.network \
+		file://11-static-end2.network \
 		file://LICENSE \
 "
 S="${WORKDIR}"
@@ -27,8 +27,8 @@ do_install() {
 	install -d ${D}/usr/lib/locale/
 
 	cp -rf ${S}/usr/lib/locale/*     ${D}/usr/lib/locale/
-	install -m 755 ${S}/10-static-eth0.network  ${D}/${sysconfdir}/systemd/network/
-	install -m 755 ${S}/11-static-eth1.network  ${D}/${sysconfdir}/systemd/network/
+	install -m 755 ${S}/10-static-end1.network  ${D}/${sysconfdir}/systemd/network/
+	install -m 755 ${S}/11-static-end2.network  ${D}/${sysconfdir}/systemd/network/
         install -m 755 ${S}/etc/myir_test/* ${D}/etc/myir_test/ 
         install -m 755 ${S}/etc/hostapd.conf ${D}/etc/hostapd.conf 
         install -m 755 ${S}/etc/udhcpd.conf ${D}/etc/udhcpd.conf
