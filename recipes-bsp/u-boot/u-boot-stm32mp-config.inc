@@ -38,13 +38,17 @@ python () {
 #
 UBOOT_CONFIG[default_stm32mp15] ?= "stm32mp15_defconfig,,u-boot.dtb"
 UBOOT_CONFIG[default_stm32mp13] ?= "stm32mp13_defconfig,,u-boot.dtb"
-UBOOT_CONFIG[default_stm32mp25] ?= "stm32mp25_defconfig,,u-boot.dtb"
+#UBOOT_CONFIG[default_stm32mp25] ?= "stm32mp25_defconfig,,u-boot.dtb"
+UBOOT_CONFIG[default_stm32mp25] ?= "myd_ld25x_2G_defconfig,,u-boot.dtb"
+#UBOOT_CONFIG[default_2G] ?= "myd_ld25x_2G_defconfig,,u-boot.dtb"
+#UBOOT_CONFIG[default_1G] ?= "myd_ld25x_1G_defconfig,,u-boot.dtb"
 UBOOT_CONFIG[programmer_stm32mp15] ?= "stm32mp15_defconfig,,u-boot.dtb"
 UBOOT_CONFIG[programmer_stm32mp13] ?= "stm32mp13_defconfig,,u-boot.dtb"
 UBOOT_CONFIG[programmer_stm32mp25] ?= "stm32mp25_defconfig,,u-boot.dtb"
 UBOOT_CONFIG[fastboot-sdcard_stm32mp15] ?= "stm32mp15-fastboot-sdcard_defconfig,,u-boot.dtb"
 UBOOT_CONFIG[fastboot-sdcard_stm32mp13] ?= "stm32mp13-fastboot-sdcard_defconfig,,u-boot.dtb"
 UBOOT_CONFIG[fastboot-sdcard_stm32mp25] ?= "stm32mp25-fastboot-sdcard_defconfig,,u-boot.dtb"
+#UBOOT_CONFIG[fastboot-sdcard_stm32mp25] ?= "myd_ld25x_2G_defconfig,,u-boot.dtb"
 UBOOT_CONFIG[fastboot-emmc_stm32mp15] ?= "stm32mp15-fastboot-emmc_defconfig,,u-boot.dtb"
 UBOOT_CONFIG[fastboot-emmc_stm32mp25] ?= "stm32mp25-fastboot-emmc_defconfig,,u-boot.dtb"
 
