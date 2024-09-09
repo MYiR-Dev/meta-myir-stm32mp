@@ -128,3 +128,4 @@ SCREEN_WIDTH=$(wayland-info | grep logical_width | sed -r "s/logical_width: ([0-
 SCREEN_HEIGHT=$(wayland-info | grep logical_width | sed -r "s/.*logical_height: ([0-9]+).*/\1/")
 echo "SCREEN_WIDTH="$SCREEN_WIDTH
 echo "SCREEN_HEIGHT="$SCREEN_HEIGHT
+ln -s /dev/$(basename $video) /dev/x_video
