@@ -80,8 +80,8 @@ update_success()
 update_fail()
 {
 	kill $LED_PID
-	echo 1 > /sys/class/leds/blue:heartbeat/brightness 
-	echo 1 > /sys/class/leds/green:heartbeat/brightness 
+	echo 0 > /sys/class/leds/blue:heartbeat/brightness 
+	echo 0 > /sys/class/leds/green:heartbeat/brightness 
 
 	while true;do
 		echo "Update failed..." > /dev/ttySTM0
@@ -377,5 +377,5 @@ echo "---------------------------update success---------------------------"
 
 
 kill $LED_PID
-echo 0 > /sys/class/leds/blue:heartbeat/brightness 
-echo 0 > /sys/class/leds/green:heartbeat/brightness 
+echo 1 > /sys/class/leds/blue:heartbeat/brightness 
+echo 1 > /sys/class/leds/green:heartbeat/brightness 
