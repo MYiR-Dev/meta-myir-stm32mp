@@ -70,9 +70,9 @@ led()
 update_success()
 {
 	while true;do
-		echo "Update complete..."
+		echo "Update complete..."  > /dev/ttySTM0
 		sleep 2
-		echo "Update complete..."
+		echo "Update complete..." > /dev/ttySTM0
 		sleep 3
 	done
 }
@@ -277,35 +277,35 @@ led &
 LED_PID=$!
 
 
-echo "---------------------------start mkfs_emmc_all ---------------------------"  
+echo "---------------------------start mkfs_emmc_all ---------------------------"   > /dev/ttySTM0
 mkfs_emmc_all
-echo "---------------------------end mkfs_emmc_all ---------------------------"
+echo "---------------------------end mkfs_emmc_all ---------------------------" > /dev/ttySTM0
 
-echo "---------------------------start fidsk_emmc ---------------------------"
+echo "---------------------------start fidsk_emmc ---------------------------" > /dev/ttySTM0
 fdisk_emmc
-echo "---------------------------end fidsk_emmc ---------------------------"
+echo "---------------------------end fidsk_emmc ---------------------------" > /dev/ttySTM0
 
 sleep 1
 
-echo "---------------------------start burn arm-trusted-firmware ---------------------------"
+echo "---------------------------start burn arm-trusted-firmware ---------------------------" > /dev/ttySTM0
 burn_fsbla
-echo "---------------------------end burn arm-trusted-firmware ---------------------------"
+echo "---------------------------end burn arm-trusted-firmware ---------------------------" > /dev/ttySTM0
 echo "\n"
 
 
 
 
-echo "---------------------------start burn meta_data ---------------------------"
+echo "---------------------------start burn meta_data ---------------------------" > /dev/ttySTM0
 burn_metadata
-echo "---------------------------end burn meta_data ---------------------------"
+echo "---------------------------end burn meta_data ---------------------------" > /dev/ttySTM0
 echo "\n"
 
 
 
 
-echo "---------------------------start burn fip ---------------------------"
+echo "---------------------------start burn fip ---------------------------" > /dev/ttySTM0
 burn_fip
-echo "---------------------------end burn fip ---------------------------"
+echo "---------------------------end burn fip ---------------------------" > /dev/ttySTM0
 echo "\n"
 
 sleep 2
@@ -313,7 +313,7 @@ enable_emmc
 sleep 1
 
 
-echo "---------------------------start boot rootfs ---------------------------"
+echo "---------------------------start boot rootfs ---------------------------" > /dev/ttySTM0
 
 burn_boot_rootfs
 i=1
@@ -336,7 +336,7 @@ done
 
 
 
-echo "---------------------------end boot rootfs---------------------------"
+echo "---------------------------end boot rootfs---------------------------" > /dev/ttySTM0
 echo "\n"
 
 
@@ -344,26 +344,26 @@ echo "\n"
 
 
 
-echo "---------------------------start vendor rootfs ---------------------------"
+echo "---------------------------start vendor rootfs ---------------------------" > /dev/ttySTM0
 burn_vendor_rootfs
-echo "---------------------------end vendor rootfs---------------------------"
+echo "---------------------------end vendor rootfs---------------------------" > /dev/ttySTM0
 echo "\n"
 
 
 
 
 
-echo "---------------------------start rootfs ---------------------------"
+echo "---------------------------start rootfs ---------------------------" > /dev/ttySTM0
 burn_rootfs
-echo "---------------------------end rootfs---------------------------"
+echo "---------------------------end rootfs---------------------------" > /dev/ttySTM0
 echo "\n"
 
 
 
 
-echo "---------------------------start user rootfs ---------------------------"
+echo "---------------------------start user rootfs ---------------------------" > /dev/ttySTM0
 burn_user_rootfs
-echo "---------------------------end user rootfs---------------------------"
+echo "---------------------------end user rootfs---------------------------" > /dev/ttySTM0
 echo "\n"
 
 
@@ -371,9 +371,9 @@ echo "\n"
 
 resize2fs_emmc
 
-echo "---------------------------update success---------------------------"
-echo "---------------------------update success---------------------------"
-echo "---------------------------update success---------------------------"
+echo "---------------------------update success---------------------------" > /dev/ttySTM0
+echo "---------------------------update success---------------------------" > /dev/ttySTM0
+echo "---------------------------update success---------------------------" > /dev/ttySTM0
 
 
 kill $LED_PID
