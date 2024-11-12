@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=c1f21c4f72f372ef38a5a4aee55ec173"
 #SRC_URI = "git://github.com/OP-TEE/optee_os.git;protocol=https;branch=master"
 OPTEE_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-optee_os.git;protocol=https"
 SRC_URI = "${OPTEE_SRC_URI};branch=develop-ld25x-3.19"
-SRCREV = "36421ecacf9e0eb43de476d2efb288053b43671e"
+SRCREV = "355cb55d2d3b647c3588e08a124a3f4eebf9268f"
 #SRCREV= "${AUTOREV}"
 
 #SRC_URI += " \

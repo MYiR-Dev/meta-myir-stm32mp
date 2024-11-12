@@ -10,7 +10,7 @@ CVE_PRODUCT = "arm:trusted_firmware-a"
 TFA_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-arm-trusted-firmware.git;protocol=https"
 SRC_URI = "${TFA_SRC_URI};branch=develop-ld25x-v2.8.15"
 #SRCREV= "${AUTOREV}"
-SRCREV= "b1d29739ddacb8ec38bf3fb08784fcabe102f274"
+SRCREV= "82d369b51b5299004d7fad82ea8c3a74fdd22a76"
 
 #SRC_URI += " \
 #    file://0001-v2.8-stm32mp-r2.patch \
