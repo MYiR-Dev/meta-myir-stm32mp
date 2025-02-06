@@ -6,12 +6,13 @@ LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://license.rst;md5=1dd070c98a281d18d9eefd938729b031"
 CVE_PRODUCT = "arm:trusted_firmware-a"
 
-SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;branch=lts-v2.10"
+TFA_SRC_URI ?= "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;branch=lts-v2.10"
+SRC_URI = "${TFA_SRC_URI}"
 SRCREV = "7c229848a09ebc3aba8e3941ae1cdfceb222a768"
 
-SRC_URI += " \
-    file://0001-v2.10-stm32mp-r1.patch \
-    "
+#SRC_URI += " \
+#    file://0001-v2.10-stm32mp-r1.patch \
+#    "
 
 TF_A_VERSION = "v2.10"
 TF_A_SUBVERSION = ".5"

@@ -12,13 +12,14 @@ DEPENDS += "dtc-native bc-native"
 DEPENDS += "flex-native bison-native"
 DEPENDS += "python3-setuptools-native"
 
-SRC_URI = "git://github.com/u-boot/u-boot.git;protocol=https;branch=master"
+UBOOT_SRC_URI ?= "git://github.com/u-boot/u-boot.git;protocol=https;branch=master"
+SRC_URI = "${UBOOT_SRC_URI}"
 SRCREV  = "4459ed60cb1e0562bc5b40405e2b4b9bbf766d57"
 
-SRC_URI += "\
-    file://0001-v2023.10-stm32mp-r1.patch \
-    file://0099-Add-external-var-to-allow-build-of-new-devicetree-fi.patch \
-    "
+#SRC_URI += "\
+#    file://0001-v2023.10-stm32mp-r1.patch \
+#    file://0099-Add-external-var-to-allow-build-of-new-devicetree-fi.patch \
+#    "
 
 # debug and trace
 SRC_URI += " ${@bb.utils.contains('ST_UBOOT_DEBUG_TRACE', '1', '', 'file://0098-silent_mode.patch', d)} "
@@ -48,7 +49,7 @@ S = "${WORKDIR}/git"
 # ---------------------------------
 BBCLASSEXTEND = "devupstream:target"
 
-SRC_URI:class-devupstream = "git://github.com/STMicroelectronics/u-boot.git;protocol=https;branch=${ARCHIVER_ST_BRANCH}"
+#SRC_URI:class-devupstream = "git://github.com/STMicroelectronics/u-boot.git;protocol=https;branch=${ARCHIVER_ST_BRANCH}"
 SRCREV:class-devupstream = "96c47fdebde887c954f5aced90ac9e32b7787091"
 
 # ---------------------------------

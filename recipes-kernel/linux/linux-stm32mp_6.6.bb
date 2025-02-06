@@ -10,13 +10,15 @@ LINUX_SUBVERSION = ".48"
 LINUX_TARBASE = "linux-${LINUX_VERSION}${LINUX_SUBVERSION}"
 LINUX_TARNAME = "${LINUX_TARBASE}.tar.xz"
 
-SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v6.x/${LINUX_TARNAME};name=kernel"
+KERNEL_SRC_URI ?= "https://cdn.kernel.org/pub/linux/kernel/v6.x/${LINUX_TARNAME};name=kernel"
+SRC_URI = "${KERNEL_SRC_URI}"
 
-SRC_URI[kernel.sha256sum] = "6b16df7b2aba3116b78fdfd8aea0b6cd7abe8f0cb699b04a66d3169141772029"
+#SRC_URI[kernel.sha256sum] = "6b16df7b2aba3116b78fdfd8aea0b6cd7abe8f0cb699b04a66d3169141772029"
+SRCREV = "${AUTOREV}"
 
-SRC_URI += " \
-    file://${LINUX_VERSION}/${LINUX_VERSION}${LINUX_SUBVERSION}/0001-v6.6-stm32mp-r1.patch \
-    "
+#SRC_URI += " \
+#    file://${LINUX_VERSION}/${LINUX_VERSION}${LINUX_SUBVERSION}/0001-v6.6-stm32mp-r1.patch \
+#    "
 
 LINUX_TARGET = "stm32mp"
 LINUX_RELEASE = "r1"
@@ -28,7 +30,8 @@ ARCHIVER_ST_REVISION = "v${LINUX_VERSION}-${LINUX_TARGET}-${LINUX_RELEASE}"
 ARCHIVER_COMMUNITY_BRANCH = "linux-${LINUX_VERSION}.y"
 ARCHIVER_COMMUNITY_REVISION = "v${LINUX_VERSION}${LINUX_SUBVERSION}"
 
-S = "${WORKDIR}/${LINUX_TARBASE}"
+#S = "${WORKDIR}/${LINUX_TARBASE}"
+S = "${WORKDIR}/git"
 
 # ---------------------------------
 # Configure devupstream class usage
@@ -56,7 +59,8 @@ include ${@oe.utils.ifelse(d.getVar('ST_ARCHIVER_ENABLE') == '1', 'linux-stm32mp
 # -------------------------------------------------------------
 # Defconfig
 #
-KERNEL_DEFCONFIG        = "defconfig"
+#KERNEL_DEFCONFIG        = "defconfig"
+KERNEL_DEFCONFIG        = "myd_stm32mp257x_defconfig"
 KERNEL_CONFIG_FRAGMENTS:stm32mp1common = "${@bb.utils.contains('KERNEL_DEFCONFIG', 'defconfig', '${S}/arch/arm/configs/fragment-01-multiv7_cleanup.config', '', d)}"
 KERNEL_CONFIG_FRAGMENTS:append:stm32mp1common = " ${@bb.utils.contains('KERNEL_DEFCONFIG', 'defconfig', '${S}/arch/arm/configs/fragment-02-multiv7_addons.config', '', d)}"
 KERNEL_CONFIG_FRAGMENTS:append:stm32mp1common = " ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${WORKDIR}/fragments/${LINUX_VERSION}/fragment-03-systemd.config', '', d)} "
