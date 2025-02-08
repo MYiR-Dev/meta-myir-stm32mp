@@ -8,7 +8,7 @@ SRC_URI += "file://LICENSE"
 
 S = "${WORKDIR}"
 
-UBOOT_SPLASH_LANDSCAPE_SRC = "ST_logo_2020_blue_H_rgb_rle8_480x183.bmp"
+UBOOT_SPLASH_LANDSCAPE_SRC = "MYiR_logo_2025_blue_H_rgb_rle8_480x183.bmp"
 UBOOT_SPLASH_PORTRAIT_SRC = "ST_logo_2020_blue_H_rgb_rle8_183x480.bmp"
 UBOOT_SPLASH_LANDSCAPE_IMAGE ?= "splash_landscape"
 UBOOT_SPLASH_PORTRAIT_IMAGE ?= "splash_portrait"
