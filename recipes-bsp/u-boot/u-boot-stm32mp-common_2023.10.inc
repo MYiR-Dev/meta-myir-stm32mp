@@ -12,9 +12,10 @@ DEPENDS += "dtc-native bc-native"
 DEPENDS += "flex-native bison-native"
 DEPENDS += "python3-setuptools-native"
 
-UBOOT_SRC_URI ?= "git://github.com/u-boot/u-boot.git;protocol=https;branch=master"
+#UBOOT_SRC_URI ?= "git://github.com/u-boot/u-boot.git;protocol=https;branch=master"
+UBOOT_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-u-boot.git;protocol=https;branch=develop-ld25x-v2023.10"
 SRC_URI = "${UBOOT_SRC_URI}"
-SRCREV  = "4459ed60cb1e0562bc5b40405e2b4b9bbf766d57"
+SRCREV  = "${AUTOREV}"
 
 #SRC_URI += "\
 #    file://0001-v2023.10-stm32mp-r1.patch \

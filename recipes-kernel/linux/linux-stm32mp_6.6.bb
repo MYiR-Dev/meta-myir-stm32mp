@@ -10,7 +10,7 @@ LINUX_SUBVERSION = ".48"
 LINUX_TARBASE = "linux-${LINUX_VERSION}${LINUX_SUBVERSION}"
 LINUX_TARNAME = "${LINUX_TARBASE}.tar.xz"
 
-KERNEL_SRC_URI ?= "https://cdn.kernel.org/pub/linux/kernel/v6.x/${LINUX_TARNAME};name=kernel"
+KERNEL_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-linux.git;protocol=https;branch=develop-ld25x-v6.6.48"
 SRC_URI = "${KERNEL_SRC_URI}"
 
 #SRC_URI[kernel.sha256sum] = "6b16df7b2aba3116b78fdfd8aea0b6cd7abe8f0cb699b04a66d3169141772029"
