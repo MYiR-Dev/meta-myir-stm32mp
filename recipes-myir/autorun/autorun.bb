@@ -1,4 +1,4 @@
-SUMMARY = "myir hmi 2.0"
+SUMMARY = "myir autorun 2.0"
 DESCRIPTION = "myir hdmi 2.0 qt application"
 
 LICENSE = "GPLv2"
