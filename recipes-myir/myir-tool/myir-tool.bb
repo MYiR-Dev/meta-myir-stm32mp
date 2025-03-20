@@ -13,6 +13,7 @@ SRC_URI += " \
 		file://10-static-end1.network \
 		file://11-static-end2.network \
 		file://bt.service \
+		file://OpenAMP_TTY_echo.tar \
 		file://LICENSE \
 "
 S="${WORKDIR}"
@@ -36,9 +37,11 @@ do_install() {
         install -m 755 ${S}/etc/myir-udhcpd.conf ${D}/etc/myir-udhcpd.conf
 	install -m 755 ${S}${bindir}/* ${D}/${bindir}/
         install -m 0644 ${S}/bcmd/* ${D}${nonarch_base_libdir}/firmware/bcmd/ 
+        install -m 0644 ${S}/bcmd/BCM4345C5_003.006.006.1043.1093.hcd ${D}${nonarch_base_libdir}/firmware/brcm/
         install -m 0644 ${S}/lib/firmware/brcm/* ${D}${nonarch_base_libdir}/firmware/brcm/ 
 	cp -r ${S}/usr/lib/locale/zh_CN ${D}/usr/lib/locale/
 
+	install -m 755 ${S}/OpenAMP_TTY_echo.tar ${D}/etc/myir_test/
 	install -m 644 ${WORKDIR}/bt.service ${D}${systemd_system_unitdir}/bt.service
 }
 

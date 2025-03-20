@@ -2,6 +2,9 @@
 source /etc/profile.d/weston_profile.sh
 source /etc/profile.d/pulse_profile.sh
 
+tar xf /etc/myir_test/OpenAMP_TTY_echo.tar -C /etc/myir_test/
+rm /etc/myir_test/OpenAMP_TTY_echo.tar
+
 # Part 1: Enhanced Time Synchronization Configuration
 CONFIG_FILE="/etc/systemd/timesyncd.conf"
 TARGET_VALUE="ntp.ntsc.ac.cn cn.ntp.org.cn time1.google.com time2.google.com time3.google.com time4.google.com"
