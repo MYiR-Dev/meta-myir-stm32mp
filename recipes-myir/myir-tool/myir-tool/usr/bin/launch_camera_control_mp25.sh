@@ -119,14 +119,14 @@ FMT=RGB16
 if media-ctl -d $DCMIPP_MEDIA > /dev/null 2>&1; then
     comp_board=$(tr -d '\0' < /proc/device-tree/compatible | sed "s|^st,|;|" | cut -d';' -f2 | head -n 1 |tr '\n' ' ' | sed "s/ //g")
     # for the time being, libcamera is only enabled on MP25-EVAL & MP25-DK
-    if $(echo $comp_board | grep -qG "stm32mp2[0-9]*[abcdef]-ev1") || $(echo $comp_board | grep -qG "stm32mp2[0-9]*[abcdef]-dk") ; then
-        GST_SOURCE="libcamerasrc name=cs src::stream-role=view-finder cs.src"
-    else
+    #if $(echo $comp_board | grep -qG "stm32mp2[0-9]*[abcdef]-ev1") || $(echo $comp_board | grep -qG "stm32mp2[0-9]*[abcdef]-dk") ; then
+    #    GST_SOURCE="libcamerasrc name=cs src::stream-role=view-finder cs.src"
+    #else
         config_dcmipp_media_ctl $WIDTH $HEIGHT $FPS
         V4L_DEVICE="device=$(media-ctl -d $DCMIPP_MEDIA -e "dcmipp_main_capture")"
         V4L_OPT=""
         GST_SOURCE="v4l2src $V4L_DEVICE $V4L_OPT"
-    fi
+    #fi
     GST_CAPS="video/x-raw, format=$FMT, width=$WIDTH, height=$HEIGHT"
 else
     get_webcam_device
