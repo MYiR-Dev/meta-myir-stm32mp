@@ -13,7 +13,7 @@ SRC_URI += " \
 		file://10-static-end1.network \
 		file://11-static-end2.network \
 		file://bt.service \
-		file://OpenAMP_TTY_echo.tar \
+		file://OpenAMP_TTY_echo \
 		file://LICENSE \
 "
 S="${WORKDIR}"
@@ -41,7 +41,7 @@ do_install() {
         install -m 0644 ${S}/lib/firmware/brcm/* ${D}${nonarch_base_libdir}/firmware/brcm/ 
 	cp -r ${S}/usr/lib/locale/zh_CN ${D}/usr/lib/locale/
 
-	install -m 755 ${S}/OpenAMP_TTY_echo.tar ${D}/etc/myir_test/
+	install -m 755 ${S}/OpenAMP_TTY_echo ${D}/etc/myir_test/
 	install -m 644 ${WORKDIR}/bt.service ${D}${systemd_system_unitdir}/bt.service
 }
 
