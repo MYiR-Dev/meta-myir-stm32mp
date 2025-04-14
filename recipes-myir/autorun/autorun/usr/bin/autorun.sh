@@ -2,9 +2,9 @@
 source /etc/profile.d/weston_profile.sh
 source /etc/profile.d/pulse_profile.sh
 
-mv /etc/myir_test/OpenAMP_TTY_echo /etc/myir_test/OpenAMP_TTY_echo.tar
-tar xf /etc/myir_test/OpenAMP_TTY_echo.tar -C /etc/myir_test/
-rm /etc/myir_test/OpenAMP_TTY_echo.tar
+mv /etc/myir_test/AMP /etc/myir_test/AMP.tar
+tar xf /etc/myir_test/AMP.tar -C /etc/myir_test/
+rm /etc/myir_test/AMP.tar
 
 # Part 1: Enhanced Time Synchronization Configuration
 CONFIG_FILE="/etc/systemd/timesyncd.conf"
