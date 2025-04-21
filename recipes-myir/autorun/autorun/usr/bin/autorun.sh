@@ -2,9 +2,9 @@
 source /etc/profile.d/weston_profile.sh
 source /etc/profile.d/pulse_profile.sh
 
-mv /etc/myir_test/AMP /etc/myir_test/AMP.tar
-tar xf /etc/myir_test/AMP.tar -C /etc/myir_test/
-rm /etc/myir_test/AMP.tar
+#mv /etc/myir_test/AMP /etc/myir_test/AMP.tar
+#tar xf /etc/myir_test/AMP.tar -C /etc/myir_test/
+#rm /etc/myir_test/AMP.tar
 
 # Part 1: Enhanced Time Synchronization Configuration
 CONFIG_FILE="/etc/systemd/timesyncd.conf"
@@ -45,21 +45,21 @@ if [ $TIME_MODIFIED -eq 1 ]; then
 fi
 
 # Part 2: Touchscreen Calibration Configuration
-RULES_FILE="/etc/udev/rules.d/touchscreen.rules"
-RULE_LINE='SUBSYSTEM=="input", KERNEL=="event[0-9]*", ENV{ID_INPUT_TOUCHSCREEN}=="1", ENV{LIBINPUT_CALIBRATION_MATRIX}=" 61.509373 0.480948 0.019359 2.795640 116.671989 -0.044791"'
+#RULES_FILE="/etc/udev/rules.d/touchscreen.rules"
+#RULE_LINE='SUBSYSTEM=="input", KERNEL=="event[0-9]*", ENV{ID_INPUT_TOUCHSCREEN}=="1", ENV{LIBINPUT_CALIBRATION_MATRIX}=" 61.509373 0.480948 0.019359 2.795640 116.671989 -0.044791"'
 
-echo "[TouchScreen] Configuring touchscreen rules..."
-if [ ! -f "$RULES_FILE" ]; then
-    touch "$RULES_FILE"
-    echo "[TouchScreen] Created new rules file"
-fi
+#echo "[TouchScreen] Configuring touchscreen rules..."
+#if [ ! -f "$RULES_FILE" ]; then
+#    touch "$RULES_FILE"
+#    echo "[TouchScreen] Created new rules file"
+#fi
 
-if ! grep -qF -- "$RULE_LINE" "$RULES_FILE"; then
-    echo "$RULE_LINE" >> "$RULES_FILE"
-    echo "[TouchScreen] Calibration matrix added"
-else
-    echo "[TouchScreen] Calibration rule already exists"
-fi
+#if ! grep -qF -- "$RULE_LINE" "$RULES_FILE"; then
+#    echo "$RULE_LINE" >> "$RULES_FILE"
+#    echo "[TouchScreen] Calibration matrix added"
+#else
+#    echo "[TouchScreen] Calibration rule already exists"
+#fi
 
 # Apply device rules
 sync

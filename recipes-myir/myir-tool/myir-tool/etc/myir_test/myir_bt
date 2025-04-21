@@ -1,10 +1,10 @@
 #!/bin/bash
 
-if systemctl status st-tsn 2>&1 | grep -qi 'Failed to start TSN service'; then
-        :
-else
-        exit 0
-fi
+#if systemctl status st-tsn 2>&1 | grep -qi 'Failed to start TSN service'; then
+#        :
+#else
+#        exit 0
+#fi
 
 PATH_FIRMWATE="/lib/firmware/bcmd/BCM4345C5_003.006.006.1043.1093.hcd"
 BT_UART="/dev/ttySTM6"

@@ -40,8 +40,12 @@ do_install() {
         install -m 0644 ${S}/bcmd/BCM4345C5_003.006.006.1043.1093.hcd ${D}${nonarch_base_libdir}/firmware/brcm/
         install -m 0644 ${S}/lib/firmware/brcm/* ${D}${nonarch_base_libdir}/firmware/brcm/ 
 	cp -r ${S}/usr/lib/locale/zh_CN ${D}/usr/lib/locale/
-
 	install -m 755 ${S}/AMP ${D}/etc/myir_test/
+	#install -m 755 ${S}/OpenAMP_TTY_echo.tar.gz ${D}/etc/myir_test/
+	cd ${D}/etc/myir_test/
+	#cp -r ${D}/etc/myir_test/OpenAMP_TTY_echo ${D}/etc/myir_test/
+	tar -xf OpenAMP_TTY_echo.tar.gz
+	rm OpenAMP_TTY_echo.tar.gz
 	install -m 644 ${WORKDIR}/bt.service ${D}${systemd_system_unitdir}/bt.service
 }
 
@@ -53,12 +57,14 @@ FILES:${PN} =" ${bindir}   \
 	     ${sysconfdir}/systemd/network/ \
 	     /usr/lib/locale/zh_CN/* \
 "
-FILES_${PN}-dbg += "${libdir}/.debug"
-INSANE_SKIP_${PN} = "ldflags"
+FILES:${PN}-dbg += "${libdir}/.debug"
+INSANE_SKIP:${PN} = "ldflags"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
 INHIBIT_PACKAGE_STRIP = "1"
-INSANE_SKIP_${PN} = "${ERROR_QA} ${WARN_QA}"
+INSANE_SKIP:${PN} = "${ERROR_QA} ${WARN_QA}"
 INSANE_SKIP:${PN} = "file-rdeps"
+# Avoid QA issue because binaries are for an Arm architecture but the platform is an AArch64
+INSANE_SKIP = "arch"
 
 SYSTEMD_PACKAGES = "${PN}"
 SYSTEMD_SERVICE:${PN} = "bt.service"
