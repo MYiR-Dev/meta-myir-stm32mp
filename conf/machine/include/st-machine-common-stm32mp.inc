@@ -333,7 +333,7 @@ UBOOT_ENTRYPOINT = "0xC4000000"
 
 # List of device tree to install
 KERNEL_DEVICETREE ?= "${STM32MP_KERNEL_DEVICETREE}"
-KERNEL_SUB_PATH = "st/"
+KERNEL_SUB_PATH = "myir/"
 
 STM32MP_KERNEL_DEVICETREE += "${@' '.join('${KERNEL_SUB_PATH}%s.dtb' % d for d in '${STM32MP_DEVICETREE}'.split())}"
 STM32MP_KERNEL_DEVICETREE += "${@' '.join('${KERNEL_SUB_PATH}%s.dtb' % d for d in '${CUBE_M4_EXAMPLES_DT}'.split())}"
@@ -360,7 +360,10 @@ ST_CMD_LINE_DEBUG_TRACE ?= "loglevel=1 quiet"
 UBOOT_CONFIG ?= ""
 # STM32mp13
 UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains_any('BOOTSCHEME_LABELS', 'optee opteemin', 'default_stm32mp13', '', d)} "
+UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains_any('BOOTSCHEME_LABELS', 'optee opteemin', 'myd_yf13x_emmc', '', d)} "
+UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains_any('BOOTSCHEME_LABELS', 'optee opteemin', 'myd_yf13x_nand', '', d)} "
 UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains('STM32MP_DEVICETREE_PROGRAMMER_ENABLE', '1', 'programmer_stm32mp13', '', d)} "
+UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains('STM32MP_DEVICETREE_PROGRAMMER_ENABLE', '1', 'programmer_nand_stm32mp13', '', d)} "
 UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains_any('BOOTSCHEME_LABELS', 'fastboot fastboot-opteemin', bb.utils.contains('BOOTDEVICE_LABELS', 'sdcard', 'fastboot-sdcard_stm32mp13', '', d), '', d)} "
 UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains_any('BOOTSCHEME_LABELS', 'fastboot fastboot-opteemin', bb.utils.contains('BOOTDEVICE_LABELS', 'emmc', 'fastboot-emmc_stm32mp13', '', d), '', d)} "
 
