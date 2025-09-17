@@ -14,7 +14,7 @@ UBOOT_EXTLINUX_SPLASH ?= "${UBOOT_SPLASH_LANDSCAPE_IMAGE}"
 UBOOT_EXTLINUX_SPLASH:stm32mp15 ?= "${UBOOT_SPLASH_PORTRAIT_IMAGE}"
 UBOOT_EXTLINUX_SPLASH:stm32mp13 ?= "${UBOOT_SPLASH_LANDSCAPE_IMAGE}"
 
-UBOOT_EXTLINUX_KERNEL_ARGS ?= "rootwait rw"
+UBOOT_EXTLINUX_KERNEL_ARGS ?= "rootwait rw loglevel=${loglevel}"
 UBOOT_EXTLINUX_KERNEL_ARGS:append = " ${@bb.utils.contains('ST_DEBUG_TRACE', '1', '', '${ST_CMD_LINE_DEBUG_TRACE}', d)} "
 UBOOT_EXTLINUX_KERNEL_ARGS:append:stm32mp2common = " earlycon"
 
@@ -39,6 +39,7 @@ UBOOT_EXTLINUX_BOOTPREFIXES:target-sdcard = "${DEVICE:SDCARD}_"
 UBOOT_EXTLINUX_BOOTPREFIXES:target-nor = "${DEVICE:NOR}_"
 UBOOT_EXTLINUX_BOOTPREFIXES:target-emmc = "${DEVICE:EMMC}_"
 UBOOT_EXTLINUX_BOOTPREFIXES:target-nand = "${DEVICE:NAND}_"
+#UBOOT_EXTLINUX_BOOTPREFIXES:target-nand = "${DEVICE:SPINAND}_"
 # Define ROOT overrides for each target
 UBOOT_EXTLINUX_ROOT:target-nand = "ubi.mtd=UBI rootfstype=ubifs root=ubi0:rootfs"
 UBOOT_EXTLINUX_ROOT:target-sdcard = "root=PARTUUID=${DEVICE_PARTUUID_ROOTFS:SDCARD}"
@@ -69,6 +70,7 @@ UBOOT_EXTLINUX_MENU_DESCRIPTION:rootfs = "OpenSTLinux"
 UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG:target-sdcard += "${STM32MP_DT_FILES_SDCARD}"
 UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG:target-emmc += "${STM32MP_DT_FILES_EMMC}"
 UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG:target-nand += "${STM32MP_DT_FILES_NAND}"
+UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG:target-nand += "${STM32MP_DT_FILES_SPINAND}"
 UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG:target-nor += "${STM32MP_DT_FILES_NOR}"
 # Define extra label configuration
 UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG[stm32mp157d-dk1] += "stm32mp157d-dk1-a7-examples"
@@ -84,6 +86,19 @@ UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG[stm32mp157f-dk2] += "stm32mp157f-dk2-m4-exam
 UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG[stm32mp157f-ev1] += "stm32mp157f-ev1-m4-examples"
 
 UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG[stm32mp135f-dk] += "stm32mp135f-dk-a7-examples"
+
+#eMMC boot label
+UBOOT_EXTLINUX_LABELS += "myb-stm32mp135x-512m-emmc"
+UBOOT_EXTLINUX_DEFAULT_LABEL:myb-stm32mp135x-512m-emmc = "myb-stm32mp135x-512m-emmc"
+UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG[myb-stm32mp135x-512m] = "myb-stm32mp135x-512m-emmc"
+UBOOT_EXTLINUX_FDT:myb-stm32mp135x-512m-emmc = "/myb-stm32mp135x-512m.dtb"
+
+#NAND boot label
+
+UBOOT_EXTLINUX_LABELS += "myb-stm32mp135x-256m-nand"
+UBOOT_EXTLINUX_DEFAULT_LABEL:myb-stm32mp135x-256m-nand = "myb-stm32mp135x-256m-nand"
+UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG[myb-stm32mp135x-256m] = "myb-stm32mp135x-256m-nand"
+UBOOT_EXTLINUX_FDT:myb-stm32mp135x-256m-nand = "/myb-stm32mp135x-256m.dtb"
 
 # Add entry on extlinux for stm32mp257f-ev1 with psci example
 UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG[stm32mp257f-ev1] += "${@bb.utils.contains('EXTERNAL_DT_ENABLED', '1', 'stm32mp257f-ev1-psci-osi-examples', '', d)}"
