@@ -226,11 +226,15 @@ PARTITIONS_BOOTLOADER_CONFIG[nor-m33td] ?= "\
 ST_BOOTFS   ?= "1"
 ST_VENDORFS ?= "1"
 ST_USERFS   ?= "1"
+NAND_USERFS   ?= "1"
+NAND_VENDORFS ?= "1"
 
 PARTITIONS_IMAGES += "${@bb.utils.contains('ST_BOOTFS', '1', bb.utils.contains('MACHINE_FEATURES', 'efi', 'bootfs efi', 'bootfs', d), '', d)}"
 PARTITIONS_IMAGES += "${@bb.utils.contains('ST_VENDORFS', '1', 'vendorfs', '', d)}"
 PARTITIONS_IMAGES += "rootfs"
 PARTITIONS_IMAGES += "${@bb.utils.contains('ST_USERFS', '1', 'userfs', '', d)}"
+PARTITIONS_IMAGES += "${@bb.utils.contains('NAND_USERFS', '1', 'userfs_nand', '', d)}"
+PARTITIONS_IMAGES += "${@bb.utils.contains('NAND_VENDORFS', '1', 'vendorfs_nand', '', d)}"
 
 # Define image partition size (supposed to be set as max size in image recipe)
 
@@ -290,6 +294,17 @@ STM32MP_VENDORFS_LABEL      ?= "vendorfs"
 STM32MP_VENDORFS_MOUNTPOINT ?= "/vendor"
 # Proposed value for vendorfs is 16MB
 STM32MP_VENDORFS_SIZE       ?= "16384"
+
+STM32MP_USERFS_NAND      ?= "st-image-userfs-nand"
+STM32MP_USERFS_NAND_LABEL      ?= "userfs"
+STM32MP_USERFS_NAND_MOUNTPOINT ?= "/usr/local"
+# Proposed value for userfs is 128MB
+STM32MP_USERFS_NAND_SIZE       ?= "131072"
+STM32MP_VENDORFS_NAND      ?= "st-image-vendorfs-nand"
+STM32MP_VENDORFS_NAND_LABEL      ?= "vendorfs"
+STM32MP_VENDORFS_NAND_MOUNTPOINT ?= "/vendor"
+# Proposed value for vendorfs is 16MB
+STM32MP_VENDORFS_NAND_SIZE       ?= "16384"
 # Override vendorfs size to 48MB
 STM32MP_VENDORFS_SIZE:stm32mp2common ?= "49152"
 
@@ -299,15 +314,21 @@ PARTITIONS_IMAGES[efi]      ?= "${STM32MP_BOOTFS_EFI_IMAGE},${STM32MP_BOOTFS_LAB
 PARTITIONS_IMAGES[vendorfs] ?= "${STM32MP_VENDORFS_IMAGE},${STM32MP_VENDORFS_LABEL},${STM32MP_VENDORFS_MOUNTPOINT},${STM32MP_VENDORFS_SIZE},FileSystem"
 PARTITIONS_IMAGES[rootfs]   ?= "${STM32MP_ROOTFS_IMAGE},${STM32MP_ROOTFS_LABEL},,${STM32MP_ROOTFS_SIZE},FileSystem"
 PARTITIONS_IMAGES[userfs]   ?= "${STM32MP_USERFS_IMAGE},${STM32MP_USERFS_LABEL},${STM32MP_USERFS_MOUNTPOINT},${STM32MP_USERFS_SIZE},FileSystem"
+PARTITIONS_IMAGES[userfs_nand]   ?= "${STM32MP_USERFS_NAND},${STM32MP_USERFS_NAND_LABEL},${STM32MP_USERFS_NAND_MOUNTPOINT},${STM32MP_USERFS_NAND_SIZE},FileSystem"
+PARTITIONS_IMAGES[vendorfs_nand] ?= "${STM32MP_VENDORFS_NAND},${STM32MP_VENDORFS_NAND_LABEL},${STM32MP_VENDORFS_NAND_MOUNTPOINT},${STM32MP_VENDORFS_NAND_SIZE},FileSystem"
 
 # =========================================================================
 # Image partition configuration : data, label, size (Kbytes)
 # =========================================================================
 # Configure the partition images list to use as default (for both ext4 and ubi)
+NAND_PARTITIONS_LIST += "${@bb.utils.contains('ST_BOOTFS', '1', 'bootfs', '', d)}"
+NAND_PARTITIONS_LIST += "rootfs"
 PARTITIONS_LIST += "${@bb.utils.contains('ST_BOOTFS', '1', 'bootfs', '', d)}"
 PARTITIONS_LIST += "${@bb.utils.contains('ST_VENDORFS', '1', 'vendorfs', '', d)}"
+PARTITIONS_LIST += "${@bb.utils.contains('NAND_VENDORFS', '1', 'vendorfs', '', d)}"
 PARTITIONS_LIST += "rootfs"
 PARTITIONS_LIST += "${@bb.utils.contains('ST_USERFS', '1', 'userfs', '', d)}"
+PARTITIONS_LIST += "${@bb.utils.contains('NAND_USERFS', '1', 'userfs_nand', '', d)}"
 # Configure the partition images list to use for EFI boot
 PARTITIONS_LIST_EFI += "${@bb.utils.contains('ST_BOOTFS', '1', 'efi', '', d)}"
 PARTITIONS_LIST_EFI += "${@bb.utils.contains('ST_VENDORFS', '1', 'vendorfs', '', d)}"
@@ -385,5 +406,5 @@ STM32MP_UBI_VOLUME_nand_4_256_512 ?= "\
 STM32MP_UBI_VOLUME_nand_2_128_256 ?= "\
     ${STM32MP_MULTIUBI_UENV1_NAME},${STM32MP_MULTIUBI_UENV1_LABEL},${STM32MP_MULTIUBI_UENV1_SIZE},empty \
     ${STM32MP_MULTIUBI_UENV2_NAME},${STM32MP_MULTIUBI_UENV2_LABEL},${STM32MP_MULTIUBI_UENV2_SIZE},empty \
-    ${@' '.join(['%s' % partImage2partConfig(d, config) for config in d.getVar('PARTITIONS_LIST').split()])} \
+    ${@' '.join(['%s' % partImage2partConfig(d, config) for config in d.getVar('NAND_PARTITIONS_LIST').split()])} \
     "
