@@ -1,0 +1,11 @@
+[Unit]
+Description=auto run hmi after weston
+After=psplash-drm-wait.service
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/autorun.sh
+
+
+[Install]
+WantedBy=multi-user.target
