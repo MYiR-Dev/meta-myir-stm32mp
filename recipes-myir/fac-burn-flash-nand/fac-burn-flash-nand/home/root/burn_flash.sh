@@ -1,0 +1,219 @@
+#!/bin/sh
+
+# dev:    size   erasesize  name
+#mtd0    0x000000000000-0x000000080000 : "fsbl1"
+#mtd1    0x000000080000-0x000000100000 : "fsbl2"
+#mtd2    0x000000100000-0x000000180000 : "metadata1"
+#mtd3    0x000000180000-0x000000200000 : "metadata2"
+#mtd4    0x000000200000-0x000000600000 : "fip-a1"
+#mtd5    0x000000600000-0x000000a00000 : "fip-a2"
+#mtd6    0x000000a00000-0x000000e00000 : "fip-b1"
+#mtd7    0x000000e00000-0x000001200000 : "fip-b2"
+#mtd8    0x000001200000-0x000010000000 : "UBI"
+
+imagedir=/home/root/yf13x_images
+. ${imagedir}/Manifest
+
+DRIVE=/dev/mmcblk1
+
+FSBLA_FILE=${imagedir}/${fsbla}
+META_FILE=${imagedir}/${metadata}
+FIP_FILE=${imagedir}/${fip}
+BOOTFS_FILE=${imagedir}/${bootfs}
+VENDORFS_FILE=${imagedir}/${vendorfs}
+ROOTFS_FILE=${imagedir}/${rootfs}
+USERFS_FILE=${imagedir}/${userfs}
+
+print_log()
+{
+	echo $1|tee /dev/ttySTM0
+}
+
+led_pid=0
+
+run_led()
+{
+	while true;do
+	     echo 1 > /sys/class/leds/blue:heartbeat/brightness
+             sleep 1
+             echo 0 > /sys/class/leds/blue:heartbeat/brightness
+             echo "Updating..." > /dev/ttySTM0
+             sleep 1
+	done
+}
+
+suc_led()
+{
+	if [ $led_pid -ne 0 ];then
+		kill $led_pid
+	fi
+	echo 1 > /sys/class/leds/blue:heartbeat/brightness
+	#echo 0 > $BUZZER
+	
+}
+
+err_led()
+{
+	if [ $led_pid -ne 0 ];then
+		kill $led_pid
+	fi
+     	echo 0 > /sys/class/leds/blue:heartbeat/brightness
+	while true;do
+		sleep 2
+		sleep 2
+	done
+}
+
+# check files
+check_file()
+{
+	if [ ! -s $1 ];then
+		print_log
+		print_log "File $1 is missing!!!"
+		print_log
+		err_led
+	fi
+}
+
+# check dir
+check_dir()
+{
+	if [ ! -d $1 ];then
+		print_log
+		print_log "Dir $1 is missing!!!"
+		print_log
+		err_led
+	fi
+}
+
+# check cmd
+check_cmd()
+{
+	echo -n "Running $@ ..." > /dev/ttySTM0
+	$@ > /dev/ttySTM0 2>&1
+	if [ $? -ne 0 ];then
+		print_log 
+		print_log "Run $@ failed!!!"
+		print_log
+		err_led
+	fi
+	echo "OK" > /dev/ttySTM0
+}
+
+## Init LEDs
+echo "none" > $LED_DEV/trigger
+run_led &
+led_pid=$!
+
+clear > /dev/ttySTM0
+
+print_log "System Update Program"
+print_log "====================================================="
+print_log
+
+step=1
+
+## check RTC time
+# print_log "${step}. Check RTC(compare to: 2016-5-1 00:00:00) ..."
+# # seconds since 1970-1-1 00:00:00 to 2016-5-1 00:00:00
+# base=1462060800
+# check_cmd hwclock -s
+# now=`date "+%s"`
+# if [ $now -lt $base ];then
+	# print_log "RTC check failed!!!"
+	# print_log
+	# err_led
+# fi
+print_log "OK"
+echo
+
+step=$((++step))
+
+## Check all files in mmc card
+print_log "${step}. Check all image files ... "
+check_dir $imagedir
+check_file $FSBLA_FILE
+check_file $FIP_FILE
+check_file $META_FILE
+check_file $ROOTFS_FILE
+#check_file $IMG_DIR/$KERNEL_FILE
+#check_file $IMG_DIR/$UBI_FILE
+print_log "OK"
+echo
+
+step=$((++step))
+
+## Write FSBL, mtd0/mtd1
+print_log "${step}. Writing $FSBLA_FILE ..."
+check_cmd flash_erase /dev/mtd0 0 0
+check_cmd nandwrite -a -p /dev/mtd0 $FSBLA_FILE
+check_cmd flash_erase /dev/mtd1 0 0
+check_cmd nandwrite -a -p /dev/mtd1 $FSBLA_FILE
+
+step=$((++step))
+## Write metadata, mtd2/mtd3
+print_log "${step}. Writing $FSBLA_FILE ..."
+check_cmd flash_erase /dev/mtd2 0 0
+check_cmd nandwrite -a -p /dev/mtd2 $META_FILE
+check_cmd flash_erase /dev/mtd3 0 0
+check_cmd nandwrite -a -p /dev/mtd3 $META_FILE
+print_log "OK"
+echo
+
+step=$((++step))
+
+## Write FIP, mtd4/mtd5/mtd6/mtd7
+print_log "${step}. Writing $FIP_FILE file ..."
+check_cmd flash_erase /dev/mtd4 0 0
+check_cmd nandwrite -a -p /dev/mtd4 $FIP_FILE
+check_cmd flash_erase /dev/mtd5 0 0
+check_cmd nandwrite -a -p /dev/mtd5 $FIP_FILE
+check_cmd flash_erase /dev/mtd6 0 0
+check_cmd nandwrite -a -p /dev/mtd6 $FIP_FILE
+check_cmd flash_erase /dev/mtd7 0 0
+check_cmd nandwrite -a -p /dev/mtd7 $FIP_FILE
+print_log "OK"
+echo
+
+step=$((++step))
+
+## Write filesystem, mtd8
+print_log "${step}. Writing $ROOTFS_FILE file ..."
+check_cmd ubiformat /dev/mtd8 -s 2048 -O 2048 -y -f $ROOTFS_FILE
+print_log "OK"
+echo
+
+step=$((++step))
+
+## Mount and check filesystem, mtd9
+print_log "${step}. Mount and check filesystem ..."
+# mount ubifs
+check_cmd ubiattach -m 8 -O 2048 > /dev/null
+check_cmd mount -t ubifs ubi0:rootfs /mnt > /dev/null
+if [ -f /media/mmcblk0p1/updates/update-sys-img.sh ];then
+	print_log "-n install patch ..."
+	check_cmd /media/mmcblk0p1/updates/update-sys-img.sh
+	print_log "OK"
+fi
+check_cmd umount /mnt > /dev/null
+print_log "OK"
+echo
+
+step=$((++step))
+
+## Cut off batter power
+print_log "${step}. Cut off batter power ..."
+#echo 0 > $BAT_PWR
+print_log "OK"
+print_log
+
+print_log "===================================="
+print_log "==== System update successfully ===="
+print_log "===================================="
+print_log 
+print_log "Re-power and boot from NAND to check whether it's runnable."
+print_log
+
+suc_led
+
+exit 0

@@ -1,11 +1,17 @@
 #!/bin/bash
 
-DEVICE=/dev/mmcblk1
+MMC_info=$(dmesg | grep "MMC")
+
+MMCtest=$(echo "$MMC_info" | cut -d':' -f1 | awk '{print $3}')
+
+MMCNUM=$(echo "$MMCtest" | awk -F'c' '{print $2}')
+
+
+DEVICE=/dev/mmcblk${MMCNUM}
 
 echo "$DEVICE"
 
-
-#DEVICE=/dev/mmcblk1    
+#DEVICE=/dev/mmcblk1	
 sgdisk -g "$DEVICE"
 (
 echo "
@@ -51,16 +57,18 @@ n
 n
 8
 526336
-+6G
++3G
 0fc63daf-8483-4772-8e79-3d69d8477de4
 n
 9
-13109248
+6817792
 
 0fc63daf-8483-4772-8e79-3d69d8477de4
 w
 Y
 ") | gdisk "$DEVICE"
+
+
 
 
 (

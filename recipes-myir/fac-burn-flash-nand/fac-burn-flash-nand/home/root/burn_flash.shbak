@@ -10,11 +10,20 @@ exit 1
 fi
 
 
-imagedir=/home/root/yf13x_images
+imagedir=/home/root/ld25x_images
 . ${imagedir}/Manifest
 
 
-DRIVE=/dev/mmcblk1
+
+
+MMC_info=$(dmesg | grep "MMC")
+
+MMCtest=$(echo "$MMC_info" | cut -d':' -f1 | awk '{print $3}')
+
+MMCNUM=$(echo "$MMCtest" | awk -F'c' '{print $2}')
+
+
+DRIVE=/dev/mmcblk${MMCNUM}
 
 
 
@@ -49,8 +58,10 @@ led()
 {
 	while true; do
 	echo 1 > /sys/class/leds/blue:heartbeat/brightness
+	echo 1 > /sys/class/leds/green:heartbeat/brightness
 		sleep 1
 	echo 0 > /sys/class/leds/blue:heartbeat/brightness 
+	echo 0 > /sys/class/leds/green:heartbeat/brightness 
 	echo "Updating..." > /dev/ttySTM0
     	sleep 1
 	done
@@ -188,7 +199,7 @@ burn_fip()
 
 enable_emmc()
 {
-	mmc bootpart enable 1 1 /dev/mmcblk1
+	mmc bootpart enable 1 1 /dev/mmcblk${MMCNUM}
 	cmd_check $? "Enable boot partion 1 to boot"
 }
 
@@ -367,3 +378,4 @@ echo "---------------------------update success---------------------------" > /d
 
 kill $LED_PID
 echo 1 > /sys/class/leds/blue:heartbeat/brightness 
+echo 1 > /sys/class/leds/green:heartbeat/brightness 
