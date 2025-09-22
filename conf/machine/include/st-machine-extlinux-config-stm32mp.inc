@@ -93,6 +93,18 @@ UBOOT_EXTLINUX_DEFAULT_LABEL:myb-stm32mp135x-512m-emmc = "myb-stm32mp135x-512m-e
 UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG[myb-stm32mp135x-512m] = "myb-stm32mp135x-512m-emmc"
 UBOOT_EXTLINUX_FDT:myb-stm32mp135x-512m-emmc = "/myb-stm32mp135x-512m.dtb"
 
+#sdcard boot label
+UBOOT_EXTLINUX_LABELS += "myb-stm32mp135x-512m-sdcard"
+UBOOT_EXTLINUX_DEFAULT_LABEL:myb-stm32mp135x-512m-sdcard = "myb-stm32mp135x-512m-sdcard"
+UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG[myb-stm32mp135x-512m-sdcard] = "myb-stm32mp135x-512m-sdcard"
+UBOOT_EXTLINUX_FDT:myb-stm32mp135x-512m-sdcard = "/myb-stm32mp135x-512m-sdcard.dtb"
+
+#sdcard boot label
+UBOOT_EXTLINUX_LABELS += "myb-stm32mp135x-256m-sdcard"
+UBOOT_EXTLINUX_DEFAULT_LABEL:myb-stm32mp135x-256m-sdcard = "myb-stm32mp135x-256m-sdcard"
+UBOOT_EXTLINUX_TARGETS_EXTRA_CONFIG[myb-stm32mp135x-256m-sdcard] = "myb-stm32mp135x-256m-sdcard"
+UBOOT_EXTLINUX_FDT:myb-stm32mp135x-256m-sdcard = "/myb-stm32mp135x-256m-sdcard.dtb"
+
 #NAND boot label
 
 UBOOT_EXTLINUX_LABELS += "myb-stm32mp135x-256m-nand"
