@@ -10,20 +10,11 @@ exit 1
 fi
 
 
-imagedir=/home/root/ld25x_images
+imagedir=/home/root/yf13x_images
 . ${imagedir}/Manifest
 
 
-
-
-MMC_info=$(dmesg | grep "MMC")
-
-MMCtest=$(echo "$MMC_info" | cut -d':' -f1 | awk '{print $3}')
-
-MMCNUM=$(echo "$MMCtest" | awk -F'c' '{print $2}')
-
-
-DRIVE=/dev/mmcblk${MMCNUM}
+DRIVE=/dev/mmcblk1
 
 
 
