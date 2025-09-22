@@ -11,14 +11,18 @@ LINUX_SUBVERSION = ".78"
 LINUX_TARBASE = "linux-${LINUX_VERSION}${LINUX_SUBVERSION}"
 LINUX_TARNAME = "${LINUX_TARBASE}.tar.xz"
 
-SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v6.x/${LINUX_TARNAME};name=kernel"
+#SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v6.x/${LINUX_TARNAME};name=kernel"
 #SRC_URI = "https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/snapshot/${LINUX_TARNAME};name=kernel"
 
 SRC_URI[kernel.sha256sum] = "5aa39a9bd555133ad741058f9908a277e6b36bb928481e747d885b50aaaa93ed"
 
-SRC_URI += " \
-    file://${LINUX_VERSION}/${LINUX_VERSION}${LINUX_SUBVERSION}/0001-v6.6-stm32mp-r2.patch \
-    "
+SRC_URI = "git://github.com/MYiR-Dev/myir-st-linux.git;protocol=https;branch=${SRCBRANCH}"
+SRCREV = "3d0e87c6cceb37c04c04caae9da66b9cf8a7b2b6"
+SRCBRANCH = "develop-yf13x-L6.6.78"
+
+#SRC_URI += " \
+#    file://${LINUX_VERSION}/${LINUX_VERSION}${LINUX_SUBVERSION}/0001-v6.6-stm32mp-r2.patch \
+#    "
 
 LINUX_TARGET = "stm32mp"
 LINUX_RELEASE = "r2"
@@ -30,7 +34,8 @@ ARCHIVER_ST_REVISION = "v${LINUX_VERSION}-${LINUX_TARGET}-${LINUX_RELEASE}"
 ARCHIVER_COMMUNITY_BRANCH = "linux-${LINUX_VERSION}.y"
 ARCHIVER_COMMUNITY_REVISION = "v${LINUX_VERSION}${LINUX_SUBVERSION}"
 
-S = "${WORKDIR}/${LINUX_TARBASE}"
+#S = "${WORKDIR}/${LINUX_TARBASE}"
+S = "${WORKDIR}/git"
 
 # ---------------------------------
 # Configure devupstream class usage
@@ -58,7 +63,7 @@ include ${@oe.utils.ifelse(d.getVar('ST_ARCHIVER_ENABLE') == '1', 'linux-stm32mp
 # -------------------------------------------------------------
 # Defconfig
 #
-KERNEL_DEFCONFIG        = "defconfig"
+KERNEL_DEFCONFIG        = "myir_stm32mp135x_defconfig"
 KERNEL_CONFIG_FRAGMENTS:arm = " \
     ${@bb.utils.contains('KERNEL_DEFCONFIG', 'defconfig', '${S}/arch/arm/configs/fragment-01-multiv7_cleanup.config', '', d)} \
     ${@bb.utils.contains('KERNEL_DEFCONFIG', 'defconfig', '${S}/arch/arm/configs/fragment-02-multiv7_addons.config', '', d)} \

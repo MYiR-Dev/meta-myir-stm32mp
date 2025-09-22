@@ -12,12 +12,16 @@ DEPENDS += "dtc-native bc-native"
 DEPENDS += "flex-native bison-native"
 DEPENDS += "python3-setuptools-native"
 
-SRC_URI = "git://github.com/u-boot/u-boot.git;protocol=https;branch=master"
-SRCREV  = "4459ed60cb1e0562bc5b40405e2b4b9bbf766d57"
+#SRC_URI = "git://github.com/u-boot/u-boot.git;protocol=https;branch=master"
+#SRCREV  = "4459ed60cb1e0562bc5b40405e2b4b9bbf766d57"
 
-SRC_URI += "\
-    file://0001-v2023.10-stm32mp-r2.patch \
-    "
+#SRC_URI += "\
+#    file://0001-v2023.10-stm32mp-r2.patch \
+#    "
+
+SRC_URI = "git://github.com/MYiR-Dev/myir-st-u-boot.git;protocol=https;branch=${SRCBRANCH}"
+SRCREV  = "bb115207b4fb72c4cd3caa0c351882e4b125fd47"
+SRCBRANCH = "develop-yf13x-v2023.10"
 
 # debug and trace
 SRC_URI += " ${@bb.utils.contains('ST_UBOOT_DEBUG_TRACE', '1', '', 'file://0098-silent_mode.patch', d)} "

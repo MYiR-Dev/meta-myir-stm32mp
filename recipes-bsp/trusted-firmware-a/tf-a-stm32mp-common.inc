@@ -9,12 +9,16 @@ CVE_PRODUCT = "arm:arm-trusted-firmware \
                arm:arm_trusted_firmware \
                arm_trusted_firmware_project:arm_trusted_firmware"
 
-SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;branch=lts-v2.10"
-SRCREV = "b1f575090608cf378440f35e7f973ee9ee0ea182"
+#SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;branch=lts-v2.10"
+#SRCREV = "b1f575090608cf378440f35e7f973ee9ee0ea182"
 
-SRC_URI += " \
-    file://0001-v2.10-stm32mp-r2.patch \
-     "
+#SRC_URI += " \
+#    file://0001-v2.10-stm32mp-r2.patch \
+# "
+
+SRC_URI = "git://github.com/MYiR-Dev/myir-st-arm-trusted-firmware.git;protocol=https;branch=${SRCBRANCH}"
+SRCREV = "e6a6fd49a4c361b088336910b61123f87e3f8548"
+SRCBRANCH = "develop-yf13x-v2.10"
 
 TF_A_VERSION = "v2.10"
 TF_A_SUBVERSION = ".13"
