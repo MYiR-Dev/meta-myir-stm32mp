@@ -25,7 +25,7 @@ do_install(){
 
        	install -m 755 ${WORKDIR}/home/root/burn_flash.sh ${D}/home/root/burn_flash.sh
         install -m 755 ${WORKDIR}/home/root/Manifest ${D}/home/root/yf13x_images/Manifest
-	install -m 755 ${DEPLOY_DIR_IMAGE}/myir-image-core-openstlinux-weston-myd-yf13x.rootfs-20250921085107_nand_2_128_256_multivolume.rootfs.ubi  ${D}/home/root/yf13x_images/myir-image-core.ubi
+	install -m 755 ${DEPLOY_DIR_IMAGE}/myir-image-core-openstlinux-weston-myd-yf13x.rootfs_nand_2_128_256_multivolume.ubi  ${D}/home/root/yf13x_images/myir-image-core.ubi
 
 	install -m 755 ${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/tf-a-myb-stm32mp135x-256m-optee-spinand.stm32 ${D}/home/root/yf13x_images/tf-a-myb-stm32mp135x-256m-optee-spinand.stm32
 	install -m 755 ${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/metadata.bin ${D}/home/root/yf13x_images/metadata.bin
