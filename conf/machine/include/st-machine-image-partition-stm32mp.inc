@@ -60,8 +60,11 @@ PARTITIONS_PROGRAMMER_CONFIG = "\
 # -----------------------------------------------------------------------------
 STM32MP_FSBL1_DATA ?= "arm-trusted-firmware/tf-a-<TYPE>-<BOOTSCHEME>-<DEVICE>${TF_A_ENCRYPT_SUFFIX}${TF_A_SIGN_SUFFIX}.stm32"
 STM32MP_FSBL1_NAME ?= "${@bb.utils.contains('ENABLE_FLASHLAYOUT_CONFIG_FWUP', '1', 'fsbl', 'fsbl1', d)}"
-STM32MP_FSBL1_NAME:stm32mp2common ?= "fsbla"
 STM32MP_FSBL1_SIZE ?= "256"
+STM32MP_FSBL0_DATA ?= "arm-trusted-firmware/tf-a-<TYPE>-<BOOTSCHEME>-<DEVICE>${TF_A_ENCRYPT_SUFFIX}${TF_A_SIGN_SUFFIX}.stm32"
+STM32MP_FSBL0_NAME ?= "${@bb.utils.contains('ENABLE_FLASHLAYOUT_CONFIG_FWUP', '1', 'fsbl0', 'fsbl1', d)}"
+STM32MP_FSBL1_NAME:stm32mp2common ?= "fsbla"
+STM32MP_FSBL0_SIZE ?= "256"
 STM32MP_FSBL2_DATA ?= "${STM32MP_FSBL1_DATA}"
 STM32MP_FSBL2_NAME ?= "fsbl2"
 STM32MP_FSBL2_NAME:stm32mp2common ?= "fsbla2"
@@ -167,7 +170,7 @@ PARTITIONS_BOOTLOADER_CONFIG[nor] ?= "\
     ${@ '${STM32MP_UENV_DATA},${STM32MP_UENV_NAME},${STM32MP_UENV_SIZE},ENV,1' if '${STM32MP_UENV_NAME}' else ''} \
     "
 PARTITIONS_BOOTLOADER_CONFIG[sdcard] ?= "\
-    ${@ '${STM32MP_FSBL1_DATA},${STM32MP_FSBL1_NAME},${STM32MP_FSBL1_SIZE},Binary,' + bb.utils.contains('ENABLE_FLASHLAYOUT_CONFIG_FWUP', '1', '2', '1', d) if '${STM32MP_FSBL1_NAME}' else ''} \
+    ${@ '${STM32MP_FSBL0_DATA},${STM32MP_FSBL0_NAME},${STM32MP_FSBL0_SIZE},Binary,' + bb.utils.contains('ENABLE_FLASHLAYOUT_CONFIG_FWUP', '1', '2', '1', d) if '${STM32MP_FSBL0_NAME}' else ''} \
     ${@ '${STM32MP_FSBL2_DATA},${STM32MP_FSBL2_NAME},${STM32MP_FSBL2_SIZE},Binary,1' if '${STM32MP_FSBL2_NAME}' and bb.utils.contains('ENABLE_FLASHLAYOUT_CONFIG_FWUP', '1', False, True, d) else ''} \
     ${@ '${STM32MP_METADATA_DATA},${STM32MP_METADATA_NAME},${STM32MP_METADATA_SIZE},FWU_MDATA,2' if '${STM32MP_METADATA_NAME}' else ''} \
     ${@ '${STM32MP_SSBL1_DATA},${STM32MP_SSBL1_NAME},${STM32MP_SSBL1_SIZE},FIP,1' if '${STM32MP_SSBL1_NAME}' else ''} \
