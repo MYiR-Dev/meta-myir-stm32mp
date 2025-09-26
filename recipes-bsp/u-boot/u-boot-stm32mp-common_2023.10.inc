@@ -19,9 +19,8 @@ DEPENDS += "python3-setuptools-native"
 #    file://0001-v2023.10-stm32mp-r2.patch \
 #    "
 
-#SRC_URI = "git://github.com/MYiR-Dev/myir-st-u-boot.git;protocol=https;branch=${SRCBRANCH}"
-SRC_URI = "git:///home/myir/bsp/uboot/myir-st-uboot;protocol=file;branch=${SRCBRANCH}"
-SRCREV  = "21d4f6deb92ee46ea9c07ee77232f6146d75f158"
+SRC_URI = "git://github.com/MYiR-Dev/myir-st-u-boot.git;protocol=https;branch=${SRCBRANCH}"
+SRCREV  = "42681a40787ab20b292265e6028f2f50dc9d2dcd"
 SRCBRANCH = "develop-yf13x-v2023.10"
 
 # debug and trace
