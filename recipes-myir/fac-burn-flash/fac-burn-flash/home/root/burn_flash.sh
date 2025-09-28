@@ -147,16 +147,16 @@ erasing_emmc()
 
 burn_fsbla()
 {
-	echo 0 > /sys/block/mmcblk${MMCNUM}boot0/force_ro
-	echo 0 > /sys/block/mmcblk${MMCNUM}boot1/force_ro
+	echo 0 > /sys/block/mmcblk1boot0/force_ro
+	echo 0 > /sys/block/mmcblk1boot1/force_ro
 	sleep 1
-	dd if=${FSBLA_FILE} of=/dev/mmcblk${MMCNUM}boot0 conv=fsync
+	dd if=${FSBLA_FILE} of=/dev/mmcblk1boot0 conv=fsync
 	cmd_check $? "Update arm-trusted-firmware boot0 file"
-	dd if=${FSBLA_FILE} of=/dev/mmcblk${MMCNUM}boot1 conv=fsync
+	dd if=${FSBLA_FILE} of=/dev/mmcblk1boot1 conv=fsync
 	cmd_check $? "Update arm-trusted-firmware boot1 file"
 	sleep 1
-	echo 1 > /sys/block/mmcblk${MMCNUM}boot0/force_ro
-	echo 1 > /sys/block/mmcblk${MMCNUM}boot1/force_ro
+	echo 1 > /sys/block/mmcblk1boot0/force_ro
+	echo 1 > /sys/block/mmcblk1boot1/force_ro
 	sync
 }
 

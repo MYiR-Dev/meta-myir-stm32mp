@@ -51,11 +51,11 @@ n
 n
 8
 526336
-+6G
++3G
 0fc63daf-8483-4772-8e79-3d69d8477de4
 n
 9
-13109248
+6817792
 
 0fc63daf-8483-4772-8e79-3d69d8477de4
 w
@@ -63,38 +63,52 @@ Y
 ") | gdisk "$DEVICE"
 
 
-(
-echo "
-c
-1
-metadata1
-c
-2
-metadata2
-c
-3
-fip-a
-c
-4
-fip-b
-c
-5
-u-boot-env
-c
-6
-bootfs
-c
-7
-vendorfs
-c
-8
-rootfs
-c
-9
-userfs
-w
-Y
-") | gdisk "$DEVICE"
+#(
+#echo "
+#c
+#1
+#metadata1
+#c
+#2
+#metadata2
+#c
+#3
+#fip-a
+#c
+#4
+#fip-b
+#c
+#5
+#u-boot-env
+#c
+#6
+#bootfs
+#c
+#7
+#vendorfs
+#c
+#8
+#rootfs
+#c
+#9
+#userfs
+#w
+#Y
+#") | gdisk "$DEVICE"
+
+
+sgdisk --change-name=1:metadata1 $DEVICE
+sgdisk --change-name=2:metadata2 $DEVICE
+sgdisk --change-name=3:fip-a $DEVICE
+sgdisk --change-name=4:fip-b $DEVICE
+sgdisk --change-name=5:u-boot-env $DEVICE
+sgdisk --change-name=6:bootfs $DEVICE
+sgdisk --change-name=7:vendorfs $DEVICE
+sgdisk --change-name=8:rootfs $DEVICE
+sgdisk --change-name=9:userfs $DEVICE
+
+# 让内核重新读取分区表
+partprobe $DEVICE
 
 
 (
