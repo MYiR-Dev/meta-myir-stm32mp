@@ -6,10 +6,11 @@ SRC_URI += " \
 		file://etc/myir_test/ \
 		file://etc/myir-hostapd.conf \
 		file://etc/myir-udhcpd.conf \
+		file://etc/99-touchscreen.rules \
  		file://usr/bin/ \
 		file://usr/lib/locale/zh_CN  \
-		file://10-static-end1.network \
-		file://11-static-end2.network \
+		file://10-static-end0.network \
+		file://11-static-end1.network \
 		file://LICENSE \
 "
 S="${WORKDIR}"
@@ -23,12 +24,14 @@ do_install() {
 	install -d ${D}/etc/
 	install -d ${D}/usr/lib/locale/
 	install -d ${D}/${sysconfdir}/systemd/network/
+	install -d ${D}/etc/udev/rules.d
 
-	install -m 755 ${S}/10-static-end1.network  ${D}/${sysconfdir}/systemd/network/
-	install -m 755 ${S}/11-static-end2.network  ${D}/${sysconfdir}/systemd/network/
+	install -m 755 ${S}/10-static-end0.network  ${D}/${sysconfdir}/systemd/network/
+	install -m 755 ${S}/11-static-end1.network  ${D}/${sysconfdir}/systemd/network/
         install -m 755 ${S}/etc/myir_test/* ${D}/etc/myir_test/ 
         install -m 755 ${S}/etc/myir-hostapd.conf ${D}/etc/myir-hostapd.conf 
         install -m 755 ${S}/etc/myir-udhcpd.conf ${D}/etc/myir-udhcpd.conf
+        install -m 755 ${S}/etc/99-touchscreen.rules ${D}/etc/udev/rules.d/99-touchscreen.rules
 	install -m 755 ${S}${bindir}/* ${D}/${bindir}/
 	cp -r ${S}/usr/lib/locale/zh_CN ${D}/usr/lib/locale/
 
