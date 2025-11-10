@@ -14,6 +14,6 @@ PRO_NAME="hciattach"
 kill_process_fun $PRO_NAME
 
 sleep 1
-brcm_patchram_plus -d --tosleep=200000 --no2bytes --enable_hci --patchram=${PATH_FIRMWATE} ${BT_UART} &
+brcm_patchram_plus -d --tosleep=200000 --baudrate 1500000 --no2bytes --enable_hci --patchram=${PATH_FIRMWATE} ${BT_UART} &
 
 /usr/libexec/bluetooth/bluetoothd &
