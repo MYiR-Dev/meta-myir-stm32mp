@@ -251,7 +251,7 @@ do_install() {
 # specific for service: start copro m33 firwmare at boot time
 SYSTEMD_PACKAGES += " m33projects-stm32mp2 "
 SYSTEMD_SERVICE:${PN} = "st-m33firmware-load.service"
-SYSTEMD_AUTO_ENABLE:${PN} = "enable"
+SYSTEMD_AUTO_ENABLE:${PN} = "disable"
 
 INITSCRIPT_NAME = "st-m33firmware-load-default.sh"
 INITSCRIPT_PARAMS = "stop 22 5 3 ."
