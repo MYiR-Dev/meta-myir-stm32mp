@@ -1,0 +1,26 @@
+From beeda06c1682662edcb9c9132f2759d6deda056a Mon Sep 17 00:00:00 2001
+From: wjl <1053924360@qq.com>
+Date: Thu, 13 Nov 2025 11:30:30 +0800
+Subject: [PATCH] FEAT:In the case of non-security and no signature, the SAES
+ peripheral needs to be removed
+
+---
+ core/arch/arm/dts/myb-stm32mp257x-base.dtsi | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/arch/arm/dts/myb-stm32mp257x-base.dtsi b/core/arch/arm/dts/myb-stm32mp257x-base.dtsi
+index e19e28f23..54cc124a1 100644
+--- a/core/arch/arm/dts/myb-stm32mp257x-base.dtsi
++++ b/core/arch/arm/dts/myb-stm32mp257x-base.dtsi
+@@ -443,7 +443,7 @@
+ };
+ 
+ &saes {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &scmi_regu {
+-- 
+2.25.1
+
