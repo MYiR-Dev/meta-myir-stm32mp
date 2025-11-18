@@ -4,7 +4,7 @@ LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171d
 
 EXTDTB_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-external-dt.git;protocol=https;branch=develop-ld25x-v6"
 SRC_URI = "${EXTDTB_SRC_URI}"
-SRCREV = "${AUTOREV}"
+SRCREV = "662f74465252402fc9e874bdfda9ab9648afc72a"
 
 S = "${WORKDIR}/git"
 
