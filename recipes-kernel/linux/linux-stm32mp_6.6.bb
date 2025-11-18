@@ -14,7 +14,7 @@ KERNEL_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-linux.git;protocol=https;br
 SRC_URI = "${KERNEL_SRC_URI}"
 
 #SRC_URI[kernel.sha256sum] = "6b16df7b2aba3116b78fdfd8aea0b6cd7abe8f0cb699b04a66d3169141772029"
-SRCREV = "${AUTOREV}"
+SRCREV = "aa851a2c21b180b3ae8fd73d77803fdb0bfc5e43"
 
 #SRC_URI += " \
 #    file://${LINUX_VERSION}/${LINUX_VERSION}${LINUX_SUBVERSION}/0001-v6.6-stm32mp-r1.patch \
