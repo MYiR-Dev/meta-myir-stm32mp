@@ -131,6 +131,7 @@ TF_A_METADATA_TOOL_ARGS ?= "-g -i 1 -b 2 -v ${TF_A_METADATA_TOOL_VERSION} 8a7a84
 
 # Configure specific build flags
 EXTRA_OEMAKE += "${@bb.utils.contains('SIGN_ENABLE', '1', 'TRUSTED_BOARD_BOOT=1', '', d)}"
+EXTRA_OEMAKE += "${@bb.utils.contains('SIGN_ENABLE', '1', 'DEBUG=0 LOG_LEVEL=20', '', d)}"
 EXTRA_OEMAKE += "${@bb.utils.contains('SIGN_ENABLE', '1', 'MBEDTLS_DIR=${S}/${TFA_MBEDTLS_DIR}', '', d)}"
 EXTRA_OEMAKE:append:stm32mp2common = " ${@bb.utils.contains('SIGN_ENABLE', '1', 'BRANCH_PROTECTION=0', '', d)} "
 
