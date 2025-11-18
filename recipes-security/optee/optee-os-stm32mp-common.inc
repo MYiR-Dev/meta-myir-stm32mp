@@ -47,6 +47,8 @@ EXTRA_OEMAKE += "CROSS_COMPILE_ta_arm64=${HOST_PREFIX}"
 EXTRA_OEMAKE += "${@bb.utils.contains('TUNE_FEATURES', 'aarch64', 'ARCH=arm CFG_ARM64_core=y', 'ARCH=arm CFG_ARM32_core=y CROSS_COMPILE_ta_arm32=${HOST_PREFIX}', d)}"
 EXTRA_OEMAKE += "NOWERROR=1"
 EXTRA_OEMAKE += "LDFLAGS="
+#EXTRA_OEMAKE += "CFG_IN_TREE_EARLY_TAS=trusted_keys/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c" 
+EXTRA_OEMAKE += "${@bb.utils.contains('SIGN_ENABLE', '1', 'CFG_IN_TREE_EARLY_TAS=trusted_keys/f04a0fe7-1f5d-4b9b-abf7-619b85b4ce8c', '', d)}"
 # Set external-dt support
 EXTRA_OEMAKE += "${@bb.utils.contains('EXTERNAL_DT_ENABLED', '1', 'CFG_EXT_DTS=${STAGING_EXTDT_DIR}/${EXTDT_DIR_OPTEE}', '', d)}"
 

@@ -4,10 +4,11 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=c1f21c4f72f372ef38a5a4aee55ec173"
 
 OPTEE_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-optee_os.git;protocol=https;branch=develop-ld25x-4.0"
 SRC_URI = "${OPTEE_SRC_URI}"
-SRCREV = "${AUTOREV}"
+SRCREV = "9841603c96fe7c8c2c00e69fa9065428e793f65e"
 
 SRC_URI += " \
     file://fonts.tar.gz;subdir=git;name=fonts \
+    ${@bb.utils.contains('SIGN_ENABLE', '1', '', 'file://0001-FEAT-In-the-case-of-non-security-and-no-signature-th.patch', d)} \
     "
 
 SRC_URI[fonts.sha256sum] = "4941e8bb6d8ac377838e27b214bf43008c496a24a8f897e0b06433988cbd53b2"
