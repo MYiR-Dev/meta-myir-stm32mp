@@ -15,7 +15,7 @@ DEPENDS += "python3-setuptools-native"
 #UBOOT_SRC_URI ?= "git://github.com/u-boot/u-boot.git;protocol=https;branch=master"
 UBOOT_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-u-boot.git;protocol=https;branch=develop-ld25x-v2023.10"
 SRC_URI = "${UBOOT_SRC_URI}"
-SRCREV  = "4f79c52f1c221bcda71ba5020567b5d048ffd7ac"
+SRCREV  = "f3efd60988000aa7a6d3ca144618bcf3f5bc8aad"
 
 #SRC_URI += "\
 #    file://0001-v2023.10-stm32mp-r1.patch \
