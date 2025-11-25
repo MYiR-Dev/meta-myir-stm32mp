@@ -15,6 +15,11 @@ STM32_CUBE_PROGRAMMER_PATH ??= "${HOME}/STMicroelectronics/STM32Cube/STM32CubePr
 # No dependencies needed since using external tool
 DEPENDS = ""
 
+SRC_URI += " \
+	file://LICENSE \
+"
+S="${WORKDIR}"
+
 do_configure[noexec] = "1"
 do_compile[noexec] = "1"
 
