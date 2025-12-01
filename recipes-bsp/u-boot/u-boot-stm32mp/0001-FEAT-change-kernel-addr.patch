@@ -1,0 +1,25 @@
+From 5d398b198f78a7ebd9013a3caca39851df952f74 Mon Sep 17 00:00:00 2001
+From: wjl <1053924360@qq.com>
+Date: Tue, 25 Nov 2025 20:25:18 +0800
+Subject: [PATCH] FEAT:change kernel addr
+
+---
+ include/configs/myd_ld25x_common.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/myd_ld25x_common.h b/include/configs/myd_ld25x_common.h
+index f53dd61d92..cbe9514caf 100644
+--- a/include/configs/myd_ld25x_common.h
++++ b/include/configs/myd_ld25x_common.h
+@@ -101,7 +101,7 @@
+  */
+ #define __KERNEL_COMP_ADDR_R	__stringify(0x84000000)
+ #define __KERNEL_COMP_SIZE_R	__stringify(0x04000000)
+-#define __KERNEL_ADDR_R		__stringify(0x88000000)
++#define __KERNEL_ADDR_R		__stringify(0x8a000000)
+ #define __FDT_ADDR_R		__stringify(0x90000000)
+ #define __SCRIPT_ADDR_R		__stringify(0x90100000)
+ #define __PXEFILE_ADDR_R	__stringify(0x90200000)
+-- 
+2.25.1
+

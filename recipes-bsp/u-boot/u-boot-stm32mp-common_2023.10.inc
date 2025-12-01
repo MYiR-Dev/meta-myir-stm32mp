@@ -18,10 +18,13 @@ SRC_URI = "${UBOOT_SRC_URI}"
 SRCREV  = "f3efd60988000aa7a6d3ca144618bcf3f5bc8aad"
 
 #SRC_URI += "\
+#     file://0001-FEAT-change-kernel-addr.patch \
+#     "
+#SRC_URI += "\
 #    file://0001-v2023.10-stm32mp-r1.patch \
 #    file://0099-Add-external-var-to-allow-build-of-new-devicetree-fi.patch \
 #    "
-
+SRC_URI += " ${@bb.utils.contains('UBOOT_SIGN_ENABLE', '1', '', 'file://0001-FEAT-change-kernel-addr.patch', d)} "
 # debug and trace
 SRC_URI += " ${@bb.utils.contains('ST_UBOOT_DEBUG_TRACE', '1', '', 'file://0098-silent_mode.patch', d)} "
 SRC_URI += "${@bb.utils.contains('ST_UBOOT_DEBUG_TRACE', '1', '', 'file://fragment-01-silent_mode.cfg;subdir=fragments/features', d)}"
