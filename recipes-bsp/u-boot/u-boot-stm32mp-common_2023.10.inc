@@ -15,7 +15,7 @@ DEPENDS += "python3-setuptools-native"
 #UBOOT_SRC_URI ?= "git://github.com/u-boot/u-boot.git;protocol=https;branch=master"
 UBOOT_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-u-boot.git;protocol=https;branch=develop-ld25x-v2023.10"
 SRC_URI = "${UBOOT_SRC_URI}"
-SRCREV  = "f3efd60988000aa7a6d3ca144618bcf3f5bc8aad"
+SRCREV  = "09ec5085cacbc548f029264d3fab827cf865f6a8"
 
 #SRC_URI += "\
 #     file://0001-FEAT-change-kernel-addr.patch \
