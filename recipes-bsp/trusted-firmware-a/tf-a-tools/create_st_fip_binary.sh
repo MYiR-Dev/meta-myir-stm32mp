@@ -879,5 +879,6 @@ fi
 
 if [ $NEED_TO_SIGN -eq 1 ]; then
     # cleanup
-    rm -rf $fiptool_output_temp_file
+    echo "out cert file"
+    # rm -rf $fiptool_output_temp_file
 fi
