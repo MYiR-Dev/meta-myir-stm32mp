@@ -7,6 +7,7 @@ inherit fip-utils-stm32mp
 
 # Include U-BOOT config definitions
 require u-boot-stm32mp-config.inc
+DEPENDS += "virtual/kernel"
 
 B = "${WORKDIR}/build"
 # Configure build dir for externalsrc class usage through devtool
@@ -204,15 +205,15 @@ export_binaries() {
 
                                 if [ "${UBOOT_SIGN_ENABLE}" = "1" ] && [ "${UBOOT_SIGN_DEPLOY}" = "1" ]; then
                                     # Prepare original binary for signature
-                                    cp -f ${B}/${config}/u-boot-${devicetree}-${type_suffix}.${binarysuffix} ${B}/${config}/${type}/u-boot-${devicetree}-${type_suffix}.${binarysuffix}
+				    # cp -f ${B}/${config}/u-boot-${devicetree}-${type_suffix}.${binarysuffix} ${B}/${config}/${type}/u-boot-${devicetree}-${type_suffix}.${binarysuffix}
                                     ${UBOOT_MKIMAGE_SIGN} \
                                             ${@'-D "${UBOOT_MKIMAGE_DTCOPTS}"' if len('${UBOOT_MKIMAGE_DTCOPTS}') else ''} \
                                             -F -k "${UBOOT_SIGN_KEYDIR}" \
-                                            -K "${B}/${config}/${type}/u-boot-${devicetree}-${type_suffix}.${binarysuffix}" \
+                                            -K "${B}/${config}/u-boot-${devicetree}-${type_suffix}.${binarysuffix}" \
                                             ${UBOOT_MKIMAGE_SIGN_ARGS} \
                                             -r ${B}/fitImage-linux
                                     # Install signed binary
-                                    install -m 644 ${B}/${config}/${type}/u-boot-${devicetree}-${type_suffix}.${binarysuffix} ${dest}/u-boot-${devicetree}-${type_suffix}-with-signature.${binarysuffix}
+                                    install -m 644 ${B}/${config}/u-boot-${devicetree}-${type_suffix}.${binarysuffix} ${dest}/u-boot-${devicetree}-${type_suffix}-with-signature.${binarysuffix}
                                 fi
                             done
                         fi
@@ -231,6 +232,8 @@ do_deploy() {
     export_binaries ${DEPLOYDIR}
 }
 addtask deploy before do_build after do_install
+
+do_install[noexec] = "1"
 
 u_boot_sysroot_populate() {
     export_binaries ${SYSROOT_DESTDIR}/${FIP_DIR_UBOOT}

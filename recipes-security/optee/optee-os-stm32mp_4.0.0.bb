@@ -11,7 +11,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=c1f21c4f72f372ef38a5a4aee55ec173"
 #   "
 
 SRC_URI = "git://github.com/MYiR-Dev/myir-st-optee_os.git;protocol=https;branch=${SRCBRANCH}"
-SRCREV = "1476d4f51dafef9907b7bbf7c5299bad47b7c319"
+SRCREV = "36d0b6255ce3b0a6b805002a9d030402dc12d8f5"
 SRCBRANCH = "develop-yf13x-v4.0"
 
 SRC_URI[fonts.sha256sum] = "4941e8bb6d8ac377838e27b214bf43008c496a24a8f897e0b06433988cbd53b2"

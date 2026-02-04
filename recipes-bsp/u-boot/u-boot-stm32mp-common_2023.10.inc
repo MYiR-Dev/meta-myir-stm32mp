@@ -20,7 +20,7 @@ DEPENDS += "python3-setuptools-native"
 #    "
 
 SRC_URI = "git://github.com/MYiR-Dev/myir-st-u-boot.git;protocol=https;branch=${SRCBRANCH}"
-SRCREV  = "42681a40787ab20b292265e6028f2f50dc9d2dcd"
+SRCREV  = "2b8c816a75dd4378be9e28b79d496cfc133e58ff"
 SRCBRANCH = "develop-yf13x-v2023.10"
 
 # debug and trace
