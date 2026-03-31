@@ -17,7 +17,7 @@ LINUX_TARNAME = "${LINUX_TARBASE}.tar.xz"
 SRC_URI[kernel.sha256sum] = "5aa39a9bd555133ad741058f9908a277e6b36bb928481e747d885b50aaaa93ed"
 
 SRC_URI = "git://github.com/MYiR-Dev/myir-st-linux.git;protocol=https;branch=${SRCBRANCH}"
-SRCREV = "f50ac5285eeb772b4393861897318757af992346"
+SRCREV = "be3a9a790aa07a79bb13210308d7b9717be377b3"
 SRCBRANCH = "develop-yf13x-L6.6.78"
 
 #SRC_URI += " \
