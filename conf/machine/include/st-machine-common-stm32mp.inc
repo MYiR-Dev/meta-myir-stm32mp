@@ -249,10 +249,10 @@ UBINIZE_ARGS_nand_2_128_256 = "--min-io-size 2048 --peb-size 128KiB"
 EXTRA_UBIFS_SIZE_nand_2_128_256 = "1408"
 # UBI Args for SPI NAND by default on MB1730 (TOSHIBA TC58CVG2S0HRAIJ) 512MB
 # LEB = BLOCK_SIZE - (2 * page size): 256*1024 - (2*4096)
-MKUBIFS_ARGS_nand_4_256_512 = "--min-io-size 4096 --leb-size 253952 --max-leb-cnt 4096"
+MKUBIFS_ARGS_nand_4_256_512 = "--min-io-size 4096 --leb-size 253952 --max-leb-cnt 2048"
 UBINIZE_ARGS_nand_4_256_512 = "--min-io-size 4096 --peb-size 256KiB"
 # Set extra size required for UBIFS volume size (KiB)
-EXTRA_UBIFS_SIZE_nand_4_256_512 = "1408"
+EXTRA_UBIFS_SIZE_nand_4_256_512 = "2304"
 
 # Default FSTYPES requested
 WKS_IMAGE_FSTYPES ?= ""
@@ -362,6 +362,7 @@ UBOOT_CONFIG ?= ""
 UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains_any('BOOTSCHEME_LABELS', 'optee opteemin', 'default_stm32mp13', '', d)} "
 UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains_any('BOOTSCHEME_LABELS', 'optee opteemin', 'myd_yf13x_emmc', '', d)} "
 UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains_any('BOOTSCHEME_LABELS', 'optee opteemin', 'myd_yf13x_nand', '', d)} "
+UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains_any('BOOTSCHEME_LABELS', 'optee opteemin', 'myd_yf13x_nand_512n512d', '', d)} "
 UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains('STM32MP_DEVICETREE_PROGRAMMER_ENABLE', '1', 'programmer_stm32mp13', '', d)} "
 UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains('STM32MP_DEVICETREE_PROGRAMMER_ENABLE', '1', 'programmer_nand_stm32mp13', '', d)} "
 UBOOT_CONFIG:append:stm32mp13common = " ${@bb.utils.contains_any('BOOTSCHEME_LABELS', 'fastboot fastboot-opteemin', bb.utils.contains('BOOTDEVICE_LABELS', 'sdcard', 'fastboot-sdcard_stm32mp13', '', d), '', d)} "
