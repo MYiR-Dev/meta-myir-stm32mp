@@ -73,12 +73,27 @@ def getVarOverrided(var, override_suffix, d):
     # Return var with local override applied
     return localdata.getVar(var)
 
+def getRootfsSizeForNand(nand_config, d):
+    """Get STM32MP_ROOTFS_SIZE with only the specified nand config in OVERRIDES,
+    avoiding cross-contamination when multiple nand overrides coexist."""
+    all_overrides = d.getVar('OVERRIDES').split(':')
+    # Remove all nand_* overrides, keep only the target one
+    filtered = [o for o in all_overrides if not o.startswith('nand_')]
+    # Prepend target nand config so it matches first
+    filtered.insert(0, nand_config)
+    localdata = bb.data.createCopy(d)
+    localdata.setVar('OVERRIDES', ':'.join(filtered))
+    return localdata.getVar('STM32MP_ROOTFS_SIZE')
+
+
 st_multivolume_ubifs() {
     if [ "${ENABLE_MULTIVOLUME_UBI}" != "1" ]; then
         return
     fi
 
     ${@' '.join(['%s_%s="%s";' % (arg, name, getVarOverrided('%s_%s' % (arg, name), name, d)) for arg in d.getVar('MULTIUBI_ARGS').split() for name in d.getVar('MULTIUBI_BUILD').split()])}
+
+    ${@' '.join(['ROOTFS_SZ_%s="%s";' % (name, getRootfsSizeForNand(name, d)) for name in d.getVar('MULTIUBI_BUILD').split()])}
 
     for name in ${MULTIUBI_BUILD}; do
         bbnote "Process multivolume UBI for configuration: ${name}"
@@ -123,6 +138,16 @@ st_multivolume_ubifs() {
                 bbnote ">>> Append ${extra_size}KiB extra space to UBIFS volume size"
                 volume_size=$(echo "${volume_size} + ${extra_size}" | bc)
                 bbnote ">>> Updated UBI volume size: ${volume_size}"
+                # Workaround: override rootfs volume_size with correctly resolved value
+                if [ "${volume_label}" = "rootfs" ]; then
+                    eval local correct_size=\"\$ROOTFS_SZ_${name}\"
+                    if [ -n "${correct_size}" ] && [ "${correct_size}" -gt "0" ]; then
+                        bbnote ">>> Override rootfs size: ${volume_size} -> ${correct_size} (from STM32MP_ROOTFS_SIZE)"
+                        volume_size="${correct_size}"
+                        volume_size=$(echo "${volume_size} + ${extra_size}" | bc)
+                        bbnote ">>> Corrected UBI volume size (with extra): ${volume_size}"
+                    fi
+                fi
                 bbnote ">>> Copy existing ubinize config file to temporary ubinize cfg file:"
                 if [ -e ${IMGDEPLOYDIR}/${ubinize_cfg} ]; then
                     cp ${IMGDEPLOYDIR}/${ubinize_cfg} ${WORKDIR}/${ubinize_cfg}
@@ -140,9 +165,9 @@ st_multivolume_ubifs() {
             # Increment volume id for next loop
             volume_id=$(expr ${volume_id} + 1)
             # Replace 'vol_flags' entry with 'vol_size' one in cfg file except for last volume to allow autoresize
-            if [ "${volume_id}" -lt "${volume_nbr}" ]; then
+            #if [ "${volume_id}" -lt "${volume_nbr}" ]; then
                 sed 's|vol_flags=.*|vol_size='"${volume_size}KiB"'|' -i ${WORKDIR}/${ubinize_cfg}
-            fi
+            #fi
             # Check for image size
             if grep -q '^image=' ${WORKDIR}/${ubinize_cfg}; then
                 image_path=$(grep '^image=' ${WORKDIR}/${ubinize_cfg} | sed 's/^image=//')
