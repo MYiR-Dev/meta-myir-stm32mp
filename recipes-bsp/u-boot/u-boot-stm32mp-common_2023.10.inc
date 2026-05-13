@@ -1,7 +1,4 @@
-# Adaptation from u-boot-common_${PV}.inc
-
-HOMEPAGE = "http://www.denx.de/wiki/U-Boot/WebHome"
-SECTION = "bootloaders"
+# Adaptation from u-boot-common_${PV}.inc HOMEPAGE = "http://www.denx.de/wiki/U-Boot/WebHome" SECTION = "bootloaders"
 
 LICENSE = "GPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://Licenses/README;md5=2ca5f2c35c8cc335f0a19756634782f1"
@@ -20,7 +17,7 @@ DEPENDS += "python3-setuptools-native"
 #    "
 
 SRC_URI = "git://github.com/MYiR-Dev/myir-st-u-boot.git;protocol=https;branch=${SRCBRANCH}"
-SRCREV  = "2b8c816a75dd4378be9e28b79d496cfc133e58ff"
+SRCREV  = "1a9b3b874b6663028bef8cec04c0238554a2d1b0"
 SRCBRANCH = "develop-yf13x-v2023.10"
 
 # debug and trace

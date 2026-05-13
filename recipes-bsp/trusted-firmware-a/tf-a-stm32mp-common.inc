@@ -17,7 +17,7 @@ CVE_PRODUCT = "arm:arm-trusted-firmware \
 # "
 
 SRC_URI = "git://github.com/MYiR-Dev/myir-st-arm-trusted-firmware.git;protocol=https;branch=${SRCBRANCH}"
-SRCREV = "02ca32340b4ef051a56eee1d8a0ce5bbe61e19cd"
+SRCREV = "6c01a0bd00db809a7ef7fc1bf154ac15639228f0"
 SRCBRANCH = "develop-yf13x-v2.10"
 
 TF_A_VERSION = "v2.10"
