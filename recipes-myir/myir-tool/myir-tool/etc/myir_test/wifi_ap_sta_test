@@ -1,0 +1,23 @@
+#!/bin/sh
+mkdir -p /var/lib/misc
+touch /var/lib/misc/udhcpd.leases
+chmod 644 /var/lib/misc/udhcpd.leases
+killall hostapd udhcpd 2>/dev/null
+sleep 1
+iw dev wlan0_ap del 2>/dev/null
+iw dev wlan0 interface add wlan0_ap type __ap
+ifconfig wlan0_ap up
+sleep 3
+ifconfig wlan0_ap 192.168.10.1 netmask 255.255.255.0
+hostapd -B /etc/myir_test/hostapd.conf &
+sleep 5
+udhcpd -f /etc/myir_test/udhcpd.conf &
+sleep 5
+echo 1 > /proc/sys/net/ipv4/ip_forward
+iptables -t nat -F
+iptables -F
+iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -o wlan0 -j MASQUERADE
+iptables -A FORWARD -i wlan0_ap -o wlan0 -j ACCEPT
+iptables -A FORWARD -i wlan0 -o wlan0_ap -m state --state RELATED,ESTABLISHED -j ACCEPT
+ifconfig wlan0
+ifconfig wlan0_ap
