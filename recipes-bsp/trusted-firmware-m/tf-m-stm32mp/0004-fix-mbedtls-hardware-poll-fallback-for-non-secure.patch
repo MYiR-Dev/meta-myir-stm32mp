@@ -1,0 +1,43 @@
+--- a/platform/ext/target/stm/common/stm32mp2xx/accelerator/stm32mp2.c
++++ b/platform/ext/target/stm/common/stm32mp2xx/accelerator/stm32mp2.c
+@@ -23,10 +23,22 @@
+
+ 	*olen = 0;
+
+-	if (IS_ENABLED(STM32_M33TDCID)) {
+-		if (entropy_get_entropy(NULL, output, len))
+-			return -1;
+-	} else if (IS_ENABLED(TFM_DUMMY_PROVISIONING)) {
++#if defined(STM32_M33TDCID)
++	/*
++	 * Try hardware TRNG first (security chip path).
++	 * On non-secure chips (D variant) the TRNG may be locked by RIF,
++	 * causing entropy_get_entropy() to return -ENODEV. Fall through
++	 * to dummy provision if that happens.
++	 */
++	if (entropy_get_entropy(NULL, output, len) == 0) {
++		*olen = len;
++		return 0;
++	}
++	/* Hardware TRNG failed — chip may be non-secure, fall through */
++#endif
++
++#if defined(TFM_DUMMY_PROVISIONING)
++	{
+ 		static const uint8_t dummy_entropy_seed[ENTROPY_SEED_SIZE] = {
+ 			0xa3, 0x1b, 0x8b, 0x12, 0xa0, 0xa2, 0x43, 0x53,
+ 			0xa5, 0x35, 0x25, 0x34, 0x90, 0xcd, 0x5f, 0xa2,
+@@ -50,10 +62,10 @@
+ 			return -1;
+
+ 		memcpy(output, dummy_entropy_seed, len);
+-	} else {
+-		/* Not yet supported */
+-		return -1;
+ 	}
++#else
++	return -1;
++#endif
+
+ 	*olen = len;
+

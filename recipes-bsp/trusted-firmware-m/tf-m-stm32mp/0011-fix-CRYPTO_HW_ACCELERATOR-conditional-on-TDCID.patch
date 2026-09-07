@@ -1,0 +1,80 @@
+From: WorkBuddy AI <buddy@workbuddy>
+Date: Wed, 30 Jul 2026 18:52:00 +0800
+Subject: [PATCH 11] fix: make CRYPTO_HW_ACCELERATOR conditional on STM32_M33TDCID
+
+ST's CMakeLists.txt unconditionally defines CRYPTO_HW_ACCELERATOR via
+target_compile_definitions(), which bypasses the cmake command-line
+-DCRYPTO_HW_ACCELERATOR=OFF flag.
+
+On D-variant (STM32MP257DAK), SAES hardware crypto is absent but
+CRYPTO_HW_ACCELERATOR being defined causes the mbedtls hardware
+accelerator path to be compiled, leading to attempts to access
+SAES_CR register (0x52050004) at boot -> BusFault.
+
+Root cause: target_compile_definitions() injects the C preprocessor
+macro directly, completely bypassing cmake cache variables set via
+-DCRYPTO_HW_ACCELERATOR=OFF on the command line.
+
+Fix: Wrap all three CRYPTO_HW_ACCELERATOR definitions in
+if(STM32_M33TDCID) ... endif() blocks. LEGACY_DRIVER_API_ENABLED
+remains unconditional.
+
+Signed-off-by: WorkBuddy AI <buddy@workbuddy>
+---
+ platform/ext/accelerator/stm32mp2/CMakeLists.txt | 39 ++++++++++++++---------
+ 1 file changed, 26 insertions(+), 13 deletions(-)
+
+--- a/platform/ext/accelerator/stm32mp2/CMakeLists.txt
++++ b/platform/ext/accelerator/stm32mp2/CMakeLists.txt
+@@ -22,9 +22,17 @@
+ 
+ ################################ BL2 ###########################################
+ if(BL2)
++    # CRYPTO_HW_ACCELERATOR requires SAES hardware (TDCID).
++    # On D-variant chips (no TDCID), enabling this causes BusFault
++    # at tfm_builtin_key_loader_init() accessing SAES_CR (0x52050004).
++    if(STM32_M33TDCID)
++        target_compile_definitions(platform_bl2
++            PRIVATE
++                CRYPTO_HW_ACCELERATOR
++        )
++    endif()
+     target_compile_definitions(platform_bl2
+         PRIVATE
+-            CRYPTO_HW_ACCELERATOR
+             LEGACY_DRIVER_API_ENABLED
+     )
+ 
+@@ -35,9 +43,14 @@
+ 
+     set(STM_LIB_TARGET bl2_crypto_hw)
+ 
++    if(STM32_M33TDCID)
++        target_compile_definitions(bl2_mbedcrypto
++            PUBLIC
++                CRYPTO_HW_ACCELERATOR
++        )
++    endif()
+     target_compile_definitions(bl2_mbedcrypto
+         PUBLIC
+-            CRYPTO_HW_ACCELERATOR
+             LEGACY_DRIVER_API_ENABLED
+     )
+ 
+@@ -57,9 +70,14 @@
+             crypto_service_crypto_hw
+     )
+ 
++    if(STM32_M33TDCID)
++        target_compile_definitions(crypto_service_mbedcrypto
++            PUBLIC
++                CRYPTO_HW_ACCELERATOR
++        )
++    endif()
+     target_compile_definitions(crypto_service_mbedcrypto
+         PUBLIC
+-            CRYPTO_HW_ACCELERATOR
+             LEGACY_DRIVER_API_ENABLED
+     )
+ 
+

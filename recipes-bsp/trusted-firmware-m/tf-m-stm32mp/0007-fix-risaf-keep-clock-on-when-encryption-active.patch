@@ -1,0 +1,48 @@
+From: Buddy <buddy@workbuddy.ai>
+Date: Wed, 30 Jul 2026 14:15:00 +0800
+Subject: [PATCH] risaf: keep clock enabled when encryption is active
+
+The stm32_risaf_init() function unconditionally disables the RISAF
+peripheral clock after initialization. When encryption is active
+(variant->has_enc = true), the AES encryption/decryption engine
+requires the clock to remain running for on-the-fly encrypt/decrypt
+of AXI transactions passing through encrypted regions.
+
+In TDCID boot flow on STM32MP2, TF-M BL2 initializes RISAF with
+encryption BEFORE DDR initialization. The subsequent DDR data bus
+test writes to 0x80000000 (which overlaps with the encrypted tfm_code
+region) and reads back the value. With RISAF clock disabled, the
+AES engine cannot encrypt/decrypt, causing the readback to return
+garbage data and the DDR test to fail with:
+
+  [ERR] [DDR] DDR data bus test: cannot access memory @ 0x80000000
+
+Fix: only disable RISAF clock when encryption is not active.
+Encrypted regions need the AES datapath clock continuously because
+encryption/decryption is triggered by AXI bus transactions, not by
+device driver API calls (the PM framework cannot wake the device
+for bus-level accesses).
+
+Signed-off-by: Buddy <buddy@workbuddy.ai>
+
+--- a/platform/ext/target/stm/common/stm32mp2xx/native_driver/src/rif/stm32_risaf.c	2026-07-30 14:22:26.144092773 +0800
++++ b/platform/ext/target/stm/common/stm32mp2xx/native_driver/src/rif/stm32_risaf.c	2026-07-30 14:23:11.953323813 +0800
+@@ -814,7 +814,17 @@
+ 	}
+ 
+ out:
+-	clk_disable(clk);
++	/*
++	 * Keep RISAF clock enabled when encryption is configured.
++	 * The AES encryption/decryption datapath needs continuous clock
++	 * because it operates transparently on AXI bus transactions.
++	 * Unlike normal PM-managed devices, RISAF encryption cannot be
++	 * woken up by a device API call -- accesses come through the bus.
++	 * Disabling the clock here would cause encrypted DDR regions to
++	 * become inaccessible (DDR test would fail).
++	 */
++	if (!drv_data->variant->has_enc)
++		clk_disable(clk);
+ 	if (err)
+ 		panic();
+ 

@@ -10,6 +10,10 @@ inherit m33fw-utils-stm32mp
 # Include TF-M config definitions
 require tf-m-stm32mp-config.inc
 
+# Include for STAGING_TF_M_TESTS_DIR
+require tf-m-tests-stm32mp-share.inc
+do_compile[depends] += "tf-m-tests-stm32mp:do_configure"
+
 # Baremetal and we bring a compiler below
 INHIBIT_DEFAULT_DEPS = "1"
 
@@ -190,7 +194,7 @@ do_compile() {
                 -DTFM_TOOLCHAIN_FILE=${S}/toolchain_GNUARM.cmake \
                 ${EXTRA_OECMAKE} \
                 ${extra_opt} \
-                -S ${S} -B ${build_path}/spe \
+                -S ${STAGING_TF_M_TESTS_DIR}/tests_reg/spe -B ${build_path}/spe \
                 ${extra_oecmake_platform} \
                 ${extra_oecmake_board_s} \
                 ${extra_oecmake_board_ns} \
@@ -202,7 +206,7 @@ do_compile() {
                 -DTFM_TOOLCHAIN_FILE=${S}/toolchain_GNUARM.cmake \
                 ${EXTRA_OECMAKE} \
                 ${extra_opt} \
-                -S ${S} -B ${build_path}/spe \
+                -S ${STAGING_TF_M_TESTS_DIR}/tests_reg/spe -B ${build_path}/spe \
                 ${extra_oecmake_platform} \
                 ${extra_oecmake_board_s} \
                 ${extra_oecmake_board_ns} \
@@ -263,15 +267,18 @@ tf_m_sysroot_populate() {
                     cp -ar ${output_path}/spe/api_ns/interface/* ${output_path_config}/spe/api_ns/interface
                     install -d ${output_path_config}/spe/api_ns/common
                     cp -ar ${output_path}/spe/api_ns/common/* ${output_path_config}/spe/api_ns/common
-                    install -d ${output_path_config}/spe/generated/devicetree/platform_s
-                    [ -e ${output_path}/spe/generated/devicetree/platform_s/devicetree_generated.h ] && cp -ar ${output_path}/spe/generated/devicetree/platform_s/devicetree_generated.h ${output_path_config}/spe/generated/devicetree/platform_s/
-                    [ -e ${output_path}/spe/build-spe/generated/devicetree/platform_s/devicetree_generated.h ] && cp -ar ${output_path}/spe/build-spe/generated/devicetree/platform_s/devicetree_generated.h ${output_path_config}/spe/generated/devicetree/platform_s/
-                    install -d ${output_path_config}/spe/api_ns/image_signing/
-                    cp -ar ${output_path}/spe/api_ns/image_signing/* ${output_path_config}/spe/api_ns/image_signing/
+                    if [ -e "${output_path}/spe/api_ns/image_signing" ]; then
+                        install -d ${output_path_config}/spe/api_ns/image_signing/
+                        cp -ar ${output_path}/spe/api_ns/image_signing/* ${output_path_config}/spe/api_ns/image_signing/
+                    fi
                     install -d ${output_path_config}/spe/api_ns/bin
 
-                    install -m 0644  ${output_path}/spe/api_ns/bin/bl2.stm32 ${output_path_config}/spe/api_ns/bin/
-                    install -m 0644  ${output_path}/spe/api_ns/bin/ddr_phy_signed.bin ${output_path_config}/spe/api_ns/bin/
+                    if [ -e "${output_path}/spe/api_ns/bin/bl2.stm32" ]; then
+                        install -m 0644  ${output_path}/spe/api_ns/bin/bl2.stm32 ${output_path_config}/spe/api_ns/bin/
+                    fi
+                    if [ -e "${output_path}/spe/api_ns/bin/ddr_phy_signed.bin" ]; then
+                        install -m 0644  ${output_path}/spe/api_ns/bin/ddr_phy_signed.bin ${output_path_config}/spe/api_ns/bin/
+                    fi
                     install -m 0644  ${output_path}/spe/api_ns/bin/tfm_s.bin ${output_path_config}/spe/api_ns/bin/
                 else
                     bbnote "Folder '${config}-${dt}/spe/api_ns' doesn't exist in ${B}"
@@ -313,11 +320,6 @@ do_deploy() {
                     install -d ${DEPLOYDIR}/bl2/debug
                     install -m 0644 ${output_path}/spe/build-spe/generated/devicetree/platform_bl2/out.${DTS_SUFFIX} ${DEPLOYDIR}/bl2/debug/${dt}${suffix_bootm33}-${BL2_NAME}.${DTS_SUFFIX}
                 fi
-                # Add device tree for debug
-                if [ -e "${output_path}/spe/generated/devicetree/platform_bl2/out.${DTS_SUFFIX}" ]; then
-                    install -d ${DEPLOYDIR}/bl2/debug
-                    install -m 0644 ${output_path}/spe/generated/devicetree/platform_bl2/out.${DTS_SUFFIX} ${DEPLOYDIR}/bl2/debug/${dt}${suffix_bootm33}-${BL2_NAME}.${DTS_SUFFIX}
-                fi
                 if [ -n "${ELF_DEBUG_ENABLE}" ]; then
                     if [ -e "${output_path}/spe/bin/${BL2_NAME}.${TF_M_ELF_SUFFIX}" ]; then
                         install -d ${DEPLOYDIR}/bl2/debug
@@ -345,11 +347,6 @@ do_deploy() {
                 install -d ${DEPLOYDIR}/debug
                 install -m 0644 ${output_path}/spe/build-spe/generated/devicetree/platform_s/out.${DTS_SUFFIX} ${DEPLOYDIR}/debug/${dt}${suffix_bootm33}${suffix_boota35}-${TF_M_NAME}${TF_M_TYPE_S}.${DTS_SUFFIX}
             fi
-            if [ -e "${output_path}/spe/generated/devicetree/platform_s/out.${DTS_SUFFIX}" ]; then
-                install -d ${DEPLOYDIR}/debug
-                install -m 0644 ${output_path}/spe/generated/devicetree/platform_s/out.${DTS_SUFFIX} ${DEPLOYDIR}/debug/${dt}${suffix_bootm33}${suffix_boota35}-${TF_M_NAME}${TF_M_TYPE_S}.${DTS_SUFFIX}
-            fi
-
             if [ -e "${output_path}/spe/bin/${TF_M_NAME}${TF_M_TYPE_S}.hex" ]; then
                 install -d ${DEPLOYDIR}/debug
                 install -m 0644 ${output_path}/spe/bin/${TF_M_NAME}${TF_M_TYPE_S}.hex ${DEPLOYDIR}/debug/${TF_M_NAME}-${dt}${suffix_bootm33}${suffix_boota35}${TF_M_TYPE_S}.hex

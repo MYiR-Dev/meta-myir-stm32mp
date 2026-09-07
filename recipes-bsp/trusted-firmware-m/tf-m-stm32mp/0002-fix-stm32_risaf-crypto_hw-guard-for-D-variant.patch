@@ -1,0 +1,25 @@
+Guard stm32_risaf.c: wrap crypto_hw.h usage with ifdef CRYPTO_HW_ACCELERATOR
+so targets without the macro and include path can still compile this file.
+
+--- a/platform/ext/target/stm/common/stm32mp2xx/native_driver/src/rif/stm32_risaf.c
++++ b/platform/ext/target/stm/common/stm32mp2xx/native_driver/src/rif/stm32_risaf.c
+@@ -23,6 +23,8 @@
+ #include <clk.h>
+ 
++#ifdef CRYPTO_HW_ACCELERATOR
+ #include <crypto_hw.h>
++#endif
+ #include <entropy.h>
+ #include <firewall.h>
+ #include <pm/device.h>
+@@ -605,6 +608,10 @@
+ 	}
+ 
++#ifdef CRYPTO_HW_ACCELERATOR
+ 	if (variant->mce_encryption_fn && !crypto_hw_is_key_ready(TFM_PLAT_HUK)) {
++#else
++	if (variant->mce_encryption_fn) {
++#endif
+ 		EMSG("[%s] HUK is not ready\n", dev->name);
+ 		err = -ENOENT;
+ 		goto out;

@@ -1,0 +1,32 @@
+From: Buddy <buddy@workbuddy.ai>
+Date: Thu, 30 Jul 2026 21:00:00 +0800
+Subject: [PATCH] fix: crypto_keys: guard SAES HUK path with CRYPTO_HW_ACCELERATOR
+
+The SAES hardware block does not exist on D-variant chips (STM32MP257DAK).
+Currently tfm_plat_get_huk() only checks STM32_M33TDCID, causing the SAES
+path to be selected even when CRYPTO_HW_ACCELERATOR=OFF. Accessing SAES
+registers (0x52050004) on D-variant triggers BusFault → UsageFault.
+
+Add && defined(CRYPTO_HW_ACCELERATOR) to the guard so that D-variant
+builds (CRYPTO_HW_ACCELERATOR=OFF) fall through to the software HUK
+derivation path (OTP certif hash).
+
+Fixes: Crypto partition init crash at tfm_builtin_key_loader_init()
+
+Signed-off-by: Buddy <buddy@workbuddy.ai>
+---
+ .../stm/common/stm32mp2xx/secure/crypto_keys.c        | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/platform/ext/target/stm/common/stm32mp2xx/secure/crypto_keys.c b/platform/ext/target/stm/common/stm32mp2xx/secure/crypto_keys.c
+--- a/platform/ext/target/stm/common/stm32mp2xx/secure/crypto_keys.c
++++ b/platform/ext/target/stm/common/stm32mp2xx/secure/crypto_keys.c
+@@ -26,7 +26,7 @@
+ #define HUK_SUBKEY_MAX_LEN	32
+ #define HUK_MAX_DATA_LEN	25
+ 
+-#if defined(STM32_M33TDCID)
++#if defined(STM32_M33TDCID) && defined(CRYPTO_HW_ACCELERATOR)
+ #define SAES_NODE_NAME	saes
+ #define HUK_SUBKEY_DIE_ID	2
+ 

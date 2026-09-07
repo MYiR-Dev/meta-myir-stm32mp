@@ -9,12 +9,16 @@ CVE_PRODUCT = "arm:arm-trusted-firmware \
                arm:arm_trusted_firmware \
                arm_trusted_firmware_project:arm_trusted_firmware"
 
-SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;branch=lts-v2.10"
-SRCREV = "a07367a19a09d3c6c426446dd408d7e522ac068b"
+#SRC_URI = "git://git.trustedfirmware.org/TF-A/trusted-firmware-a.git;protocol=https;branch=lts-v2.10"
+#SRCREV = "a07367a19a09d3c6c426446dd408d7e522ac068b"
 
-SRC_URI += " \
-    file://0001-v2.10-stm32mp-r3.1.patch \
-     "
+#SRC_URI += " \
+#    file://0001-v2.10-stm32mp-r3.1.patch \
+#     "
+SRC_URI = "git:///home/myir/bsp/myir-st-tfa;protocol=file;branch=develop_v2.10"
+SRCREV = "822a4c9234e083bfd21dd367451353fe05d56354"
+
+SRC_URI += "${@bb.utils.contains('SIGN_ENABLE', '1', 'file://0002-myir-enable-security-peripherals-for-tbb.patch', '', d)}"
 
 TF_A_VERSION = "v2.10"
 TF_A_SUBVERSION = ".24"

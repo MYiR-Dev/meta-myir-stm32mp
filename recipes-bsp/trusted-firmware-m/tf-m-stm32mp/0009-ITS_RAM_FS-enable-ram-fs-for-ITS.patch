@@ -1,0 +1,12 @@
+diff --git a/platform/ext/target/stm/common/stm32mp2xx/config_tfm_stm32mp2.h b/platform/ext/target/stm/common/stm32mp2xx/config_tfm_stm32mp2.h
+index aaaaaaa..bbbbbbb 100644
+--- a/platform/ext/target/stm/common/stm32mp2xx/config_tfm_stm32mp2.h
++++ b/platform/ext/target/stm/common/stm32mp2xx/config_tfm_stm32mp2.h
+@@ -46,4 +46,7 @@
+ /* TLV minor used for platform boot data with TLV_MAJOR_PLATFORM */
+ #define TLV_PLAT_DDRENCKEY 0
+ 
++/* Enable ITS RAM FS */
++#define ITS_RAM_FS 1
++
+ #endif /* __CONFIG_TFM_STM32MP2_H__ */
