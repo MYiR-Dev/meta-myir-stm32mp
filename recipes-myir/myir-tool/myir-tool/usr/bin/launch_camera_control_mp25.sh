@@ -137,6 +137,17 @@ else
     v4l2-ctl --set-parm=20
 fi
 
+# SSH and serial shells do not inherit the Weston user environment.
+if [ -z "${XDG_RUNTIME_DIR:-}" ] || [ ! -S "${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY:-wayland-0}" ]; then
+    for wayland_socket in /run/user/*/wayland-*; do
+        [ -S "$wayland_socket" ] || continue
+        XDG_RUNTIME_DIR=${wayland_socket%/*}
+        WAYLAND_DISPLAY=${wayland_socket##*/}
+        export XDG_RUNTIME_DIR WAYLAND_DISPLAY
+        break
+    done
+fi
+
 # Detect size of screen
 SCREEN_WIDTH=$(wayland-info -i zxdg_output_manager_v1 | grep -A2 "name" | tr '\n' ' ' | sed "s|--|#|g" |tr '#' '\n' | grep -v pipewire | tr '\t' '\n' | grep logical_width | sed -r "s/logical_width: ([0-9]+),.*/\1/")
 SCREEN_HEIGHT=$(wayland-info -i zxdg_output_manager_v1 | grep -A2 "name" | tr '\n' ' ' | sed "s|--|#|g" |tr '#' '\n' | grep -v pipewire | tr '\t' '\n' | grep logical_width | sed -r "s/.*logical_height: ([0-9]+).*/\1/")

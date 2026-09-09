@@ -1,0 +1,33 @@
+From 6b82c5b2d36fab42b3ee9beb1bc5e7e0af9e74c7 Mon Sep 17 00:00:00 2001
+From: MYIR <support@myirtech.com>
+Date: Wed, 9 Sep 2026 12:00:00 +0800
+Subject: [PATCH] mediapipeline: use Linux 6.6 subdev routing API
+
+The STM32MP25 Linux 6.6 UAPI exposes num_routes but does not have the
+later len_routes member. num_routes is already initialized correctly, so
+drop the incompatible assignment.
+
+Upstream-Status: Inappropriate [STM32MP25 Linux 6.6 compatibility]
+
+Signed-off-by: MYIR <support@myirtech.com>
+---
+ mediapipeline.cpp | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/mediapipeline.cpp b/mediapipeline.cpp
+index b568865..f0329da 100644
+--- a/mediapipeline.cpp
++++ b/mediapipeline.cpp
+@@ -723,9 +723,6 @@ static int configureRoutingIfNeeded(int mediaFd,
+         rt.which      = V4L2_SUBDEV_FORMAT_ACTIVE;
+         rt.routes     = (__u64)(uintptr_t)&route;
+         rt.num_routes = 1;
+-#ifdef VIDIOC_SUBDEV_S_ROUTING
+-        rt.len_routes = 1;
+-#endif
+ 
+         if (ioctl(sfd, VIDIOC_SUBDEV_S_ROUTING, &rt) < 0) {
+             qCWarning(mpLog, "MP: S_ROUTING failed on %s sink_pad%d→src_pad%d: %s",
+-- 
+2.43.0
+

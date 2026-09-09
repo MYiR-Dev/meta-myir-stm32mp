@@ -7,7 +7,9 @@ LIC_FILES_CHKSUM = "file://licenses/GPL-2;md5=94d55d512a9ba36caa9b7df079bae19f"
 S = "${WORKDIR}"
 
 SRC_URI = "file://licenses/GPL-2 \
-	   file://usr/sbin/ \
+	   file://usr/sbin/adl10-e \
+	   file://usr/sbin/adl10-e_client \
+	   file://usr/sbin/uart_test \
 	   file://usr/bin/autorun.sh \
 	   file://usr/share/fonts/ttf/msyh.ttc \
 	   file://usr/share/myir/ecg.dat \
@@ -19,6 +21,8 @@ SRC_URI = "file://licenses/GPL-2 \
           "
           
 inherit  systemd
+
+RDEPENDS:${PN}:append:stm32mp25common = " myir-hmi"
 
 S = "${WORKDIR}"
 
@@ -39,7 +43,9 @@ do_install (){
 
 	
 	install -m 755 ${WORKDIR}${bindir}/autorun.sh ${D}${bindir}/autorun.sh
-	install -m 755 ${WORKDIR}${sbindir}/* ${D}${sbindir}/
+	install -m 755 ${WORKDIR}${sbindir}/adl10-e ${D}${sbindir}/adl10-e
+	install -m 755 ${WORKDIR}${sbindir}/adl10-e_client ${D}${sbindir}/adl10-e_client
+	install -m 755 ${WORKDIR}${sbindir}/uart_test ${D}${sbindir}/uart_test
 	install -m 755 ${WORKDIR}/usr/share/fonts/ttf/msyh.ttc ${D}/usr/share/fonts/ttf/msyh.ttc
 	install -m 755 ${WORKDIR}${datadir}/myir/ecg.dat ${D}${datadir}/myir/ecg.dat
 	install -m 755 ${WORKDIR}${datadir}/myir/resp.text ${D}${datadir}/myir/resp.text

@@ -7,12 +7,12 @@ function pty_exec() {
     pty=$(tty > /dev/null 2>&1; echo $?)
     if [ $pty -eq 0 ]; then
         cmd=$(echo $cmd | sed "s#\"#'#g")
-        event_cmd=$(echo /usr/bin/touch-event-gtk-player -w $SCREEN_WIDTH -h $SCREEN_HEIGHT --graph \"$cmd\")
+        event_cmd=$(echo /usr/local/demo/bin/touch-event-gtk-player -w $SCREEN_WIDTH -h $SCREEN_HEIGHT --graph \"$cmd\")
         eval $event_cmd > /dev/null 2>&1
     else
         # no pty
         echo "NO PTY"
-        event_cmd=$(echo /usr/bin/touch-event-gtk-player -w $SCREEN_WIDTH -h $SCREEN_HEIGHT --graph \'$cmd\')
+        event_cmd=$(echo /usr/local/demo/bin/touch-event-gtk-player -w $SCREEN_WIDTH -h $SCREEN_HEIGHT --graph \'$cmd\')
         script -qc "$event_cmd" > /dev/null 2>&1
     fi
 }
@@ -26,4 +26,3 @@ pty_exec "$GRAPH"
 #Kill exposure correction background task
 killall launch_camera_control_mp25.sh
 killall launch_camera_preview_mp25.sh
-

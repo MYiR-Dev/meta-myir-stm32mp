@@ -14,13 +14,17 @@ LINUX_SUBVERSION = ".129"
 LINUX_TARBASE = "linux-${LINUX_VERSION}${LINUX_SUBVERSION}"
 LINUX_TARNAME = "${LINUX_TARBASE}.tar.xz"
 
-SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v6.x/${LINUX_TARNAME};name=kernel"
+#SRC_URI = "https://cdn.kernel.org/pub/linux/kernel/v6.x/${LINUX_TARNAME};name=kernel"
 
-SRC_URI[kernel.sha256sum] = "caa08f0122224fbbfab177e2a37cc2a94a0046bd2e7e87f03f8913f2b812448a"
+#SRC_URI[kernel.sha256sum] = "caa08f0122224fbbfab177e2a37cc2a94a0046bd2e7e87f03f8913f2b812448a"
 
-SRC_URI += " \
-    file://${LINUX_VERSION}/${LINUX_VERSION}${LINUX_SUBVERSION}/0001-v6.6-stm32mp-r3.1.patch \
-    "
+#SRC_URI += " \
+#    file://${LINUX_VERSION}/${LINUX_VERSION}${LINUX_SUBVERSION}/0001-v6.6-stm32mp-r3.1.patch \
+#    "
+
+KERNEL_SRC_URI ?= "git:///home/myir/bsp/myir-st-linux;protocol=file;branch=develop_6.6.129"
+SRC_URI = "${KERNEL_SRC_URI}"
+SRCREV = "d3f536e00fabb94ac94c6fff691fe8b874a74243"
 
 LINUX_TARGET = "stm32mp"
 LINUX_RELEASE = "r3.1"
@@ -32,7 +36,8 @@ ARCHIVER_ST_REVISION = "v${LINUX_VERSION}-${LINUX_TARGET}-${LINUX_RELEASE}"
 ARCHIVER_COMMUNITY_BRANCH = "linux-${LINUX_VERSION}.y"
 ARCHIVER_COMMUNITY_REVISION = "v${LINUX_VERSION}${LINUX_SUBVERSION}"
 
-S = "${WORKDIR}/${LINUX_TARBASE}"
+#S = "${WORKDIR}/${LINUX_TARBASE}"
+S = "${WORKDIR}/git"
 
 # ---------------------------------
 # Configure devupstream class usage
@@ -60,7 +65,8 @@ include ${@oe.utils.ifelse(d.getVar('ST_ARCHIVER_ENABLE') == '1', 'linux-stm32mp
 # -------------------------------------------------------------
 # Defconfig
 #
-KERNEL_DEFCONFIG        = "defconfig"
+#KERNEL_DEFCONFIG        = "defconfig"
+KERNEL_DEFCONFIG        = "myd_stm32mp257x_defconfig"
 KERNEL_CONFIG_FRAGMENTS:arm = " \
     ${@bb.utils.contains('KERNEL_DEFCONFIG', 'defconfig', '${S}/arch/arm/configs/fragment-01-multiv7_cleanup.config', '', d)} \
     ${@bb.utils.contains('KERNEL_DEFCONFIG', 'defconfig', '${S}/arch/arm/configs/fragment-02-multiv7_addons.config', '', d)} \

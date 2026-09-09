@@ -20,6 +20,8 @@ S="${WORKDIR}"
 
 inherit  systemd
 
+RDEPENDS:${PN} += "event-gtk-player"
+
 do_install() {
 	install -d ${D}${systemd_system_unitdir}
 	install -d ${D}${bindir}

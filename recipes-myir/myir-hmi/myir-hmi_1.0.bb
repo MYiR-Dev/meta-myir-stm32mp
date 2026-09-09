@@ -1,0 +1,32 @@
+SUMMARY = "MYiR HMI Qt6 demo application"
+DESCRIPTION = "MXAPP2 Qt6/QML HMI demo for MYD-LD25X"
+LICENSE = "CLOSED"
+
+SRC_URI = "git://github.com/MYiR-Dev/mxapp.git;protocol=https;branch=MXAPP2-QT6-IMX9X \
+           file://0001-mediapipeline-use-Linux-6.6-subdev-routing-API.patch \
+"
+SRCREV = "3da3aa1f8b108019ccacdcaecaae403de18173a5"
+
+S = "${WORKDIR}/git"
+
+DEPENDS = "\
+    qtbase \
+    qtdeclarative \
+    qtdeclarative-native \
+    qtmultimedia \
+    qttools-native \
+    qtvirtualkeyboard \
+"
+
+inherit qt6-cmake
+
+EXTRA_OECMAKE = "-DCMAKE_BUILD_TYPE=Release -DENABLE_PLAYER=ON"
+
+do_install() {
+    install -d ${D}${sbindir}
+    install -m 0755 ${B}/mxapp2 ${D}${sbindir}/mxapp2
+}
+
+FILES:${PN} = "${sbindir}/mxapp2"
+
+COMPATIBLE_MACHINE = "stm32mp25common"
