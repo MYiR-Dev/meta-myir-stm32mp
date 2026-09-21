@@ -1,0 +1,95 @@
+From 9d2ff9e9c7cdb8c145e88532d0737139b12dc03a Mon Sep 17 00:00:00 2001
+From: MYIR <support@myirtech.com>
+Date: Sun, 20 Sep 2026 12:10:00 +0800
+Subject: [PATCH] camera: prefer real sensor over DCMIPP TPG
+
+Both dcmipp_tpg and OV5640 report MEDIA_ENT_F_CAM_SENSOR. The topology
+enumerates the TPG first, so mxapp2 selected it and left both TPG and CSI
+links enabled on dcmipp_input pad 0. STREAMON then failed with EPIPE.
+
+Prefer a physical sensor over dcmipp_tpg and disable every enabled
+mutable dcmipp_input link that is not part of the selected path. Also
+request the same 640x480 preview size used by the working ST camera
+script; OV5640 and the ISP input remain at 1280x720, with scaling done by
+dcmipp_main_postproc.
+
+Upstream-Status: Inappropriate [STM32MP25 board integration]
+
+Signed-off-by: MYIR <support@myirtech.com>
+---
+ camera_qthread.h  |  2 +-
+ mediapipeline.cpp | 24 +++++++++++++++++++++---
+ 2 files changed, 22 insertions(+), 4 deletions(-)
+
+diff --git a/camera_qthread.h b/camera_qthread.h
+index 4d867bd..017e3b1 100644
+--- a/camera_qthread.h
++++ b/camera_qthread.h
+@@ -35,7 +35,7 @@ public:
+     static Camera_qthread* getInstance();
+     void run() override;
+     int xioctl(int fh, int request, void *arg);
+-    bool set_device(QString device, int in_width = 1280, int in_height = 720);
++    bool set_device(QString device, int in_width = 640, int in_height = 480);
+     bool isMultiCamera(int fd);
+     void exit_camera();
+ 
+diff --git a/mediapipeline.cpp b/mediapipeline.cpp
+index 830b42c..ee05528 100644
+--- a/mediapipeline.cpp
++++ b/mediapipeline.cpp
+@@ -402,14 +402,27 @@ static int findSensor(const QVector<MediaPipeline::TopoEntity> &ents,
+                        const QVector<MediaPipeline::TopoLink> &links)
+ {
+     // 策略 1: 按标准 V4L2 entity function 匹配
++    // DCMIPP TPG also reports CAM_SENSOR and is enumerated before OV5640.
++    // Keep it only as a fallback when no physical sensor is present.
+     // MEDIA_ENT_F_CAM_SENSOR 由 linux/media.h 定义为 (MEDIA_ENT_F_OLD_SUBDEV_BASE + 1)
++    int fallbackSensor = -1;
+     for (int ei = 0; ei < ents.size(); ei++) {
+         if (ents[ei].function == MEDIA_ENT_F_CAM_SENSOR) {
++            if (ents[ei].name.contains(QStringLiteral("dcmipp_tpg"),
++                                       Qt::CaseInsensitive)) {
++                fallbackSensor = ei;
++                continue;
++            }
+             qCDebug(mpLog, "MP: sensor by function: '%s' (id=%u)",
+                     qPrintable(ents[ei].name), ents[ei].id);
+             return ei;
+         }
+     }
++    if (fallbackSensor >= 0) {
++        qCDebug(mpLog, "MP: using TPG fallback sensor: '%s' (id=%u)",
++                qPrintable(ents[fallbackSensor].name), ents[fallbackSensor].id);
++        return fallbackSensor;
++    }
+ 
+     // 策略 2: 拓扑叶子节点 — 只有 SOURCE 输出、没有 SINK 输入的 subdev
+     for (int ei = 0; ei < ents.size(); ei++) {
+@@ -576,8 +588,8 @@ static bool buildPath(const QVector<MediaPipeline::TopoEntity> &entities,
+     return true;
+ }
+ 
+-// Disable stale mutable DCMIPP input branches left enabled by another user.
+-// The main ISP link is immutable; dump and auxiliary links are mutable.
++// Disable stale mutable links on either side of dcmipp_input.
++// This includes the TPG input and dump/auxiliary output branches.
+ static int disableDcmippCompetingLinks(
+     int mediaFd,
+     const QVector<MediaPipeline::TopoEntity> &entities,
+@@ -612,7 +625,12 @@ static int disableDcmippCompetingLinks(
+             continue;
+         const MediaPipeline::TopoEntity *src = entityById(sp->entityId);
+         const MediaPipeline::TopoEntity *dst = entityById(dp->entityId);
+-        if (!src || !dst || src->name != QStringLiteral("dcmipp_input"))
++        if (!src || !dst)
++            continue;
++        const bool touchesDcmippInput =
++            src->name == QStringLiteral("dcmipp_input") ||
++            dst->name == QStringLiteral("dcmipp_input");
++        if (!touchesDcmippInput)
+             continue;
+ 
+         struct media_link_desc ld;
+-- 
+2.43.0
