@@ -1,0 +1,103 @@
+From 40534452f60da2ed7ac9041f8694cffeadc817c6 Mon Sep 17 00:00:00 2001
+From: MYIR <support@myirtech.com>
+Date: Mon, 14 Sep 2026 11:45:00 +0800
+Subject: [PATCH] camera: preserve DCMIPP main pipeline input size
+
+The OV5640 raw stream is 1280x720 while preview output is 640x480.
+propagateFormats() selected the first source pad of each entity, which is
+the dump output on dcmipp_input. Its default 640x480 format then leaked
+into the main ISP path and caused the DCMIPP driver to reject streaming:
+
+  Wrong width or height 1280x720 (640x480 expected)
+
+Select the source pad connected to the next path hop and configure it
+before propagating its negotiated format. This keeps sensor, bridge,
+dcmipp_input and main ISP at 1280x720; only main_postproc scales the
+capture output to 640x480.
+
+Upstream-Status: Inappropriate [STM32MP25 board integration]
+
+Signed-off-by: MYIR <support@myirtech.com>
+---
+ mediapipeline.cpp | 61 ++++++++++++++++++++++++++++++++++++-----------------
+ 1 file changed, 42 insertions(+), 19 deletions(-)
+
+diff --git a/mediapipeline.cpp b/mediapipeline.cpp
+index cc5373e..830b42c 100644
+--- a/mediapipeline.cpp
++++ b/mediapipeline.cpp
+@@ -1077,30 +1077,53 @@ static int propagateFormats(int mediaFd,
+-            // ★ 读取同一 entity 的 SOURCE pad 格式
+-            // SINK pad 接受的格式，SOURCE pad 未必能输出（如 csidev SOURCE 只支持 UYVY8_1X16）
+-            // 以 SOURCE pad 实际格式为准传播到下一跳
++            // Configure the SOURCE pad that is actually used by the next hop.
++            // Some entities expose multiple outputs (dcmipp_input has dump/main/aux),
++            // so reading the first SOURCE pad can pick the 640x480 dump default and
++            // incorrectly shrink the 1280x720 OV5640 main pipeline.
+             const MediaPipeline::TopoPad *srcPad = nullptr;
+-            for (auto &p : pads) {
+-                if (p.entityId == entities[dstEntIdx].id &&
+-                    (p.flags & MEDIA_PAD_FL_SOURCE)) {
+-                    srcPad = &p;
+-                    break;
++            if (i + 1 < path.size() && path[i + 1].srcEntIdx == dstEntIdx)
++                srcPad = padById(path[i + 1].srcPadId);
++
++            if (!srcPad) {
++                for (const auto &p : pads) {
++                    if (p.entityId == entities[dstEntIdx].id &&
++                        (p.flags & MEDIA_PAD_FL_SOURCE)) {
++                        srcPad = &p;
++                        break;
++                    }
+                 }
+             }
++
+             if (srcPad) {
++                QVector<unsigned int> srcCodes = enumMbusCodes(sfd, srcPad->index);
++                uint32_t srcCode = currentCode;
++                if (!srcCodes.isEmpty() && !srcCodes.contains(srcCode))
++                    srcCode = bestOutputMbusCode(srcCodes);
++
+                 struct v4l2_subdev_format srcFmt;
+                 memset(&srcFmt, 0, sizeof(srcFmt));
++                srcFmt.pad           = srcPad->index;
++                srcFmt.which         = V4L2_SUBDEV_FORMAT_ACTIVE;
++                srcFmt.format.width  = currentW;
++                srcFmt.format.height = currentH;
++                srcFmt.format.code   = srcCode;
++                srcFmt.format.field  = V4L2_FIELD_NONE;
++
++                if (ioctl(sfd, VIDIOC_SUBDEV_S_FMT, &srcFmt) < 0) {
++                    qCCritical(mpLog, "MP: SOURCE S_FMT failed on %s pad%d: %s",
++                               qPrintable(entities[dstEntIdx].name), srcPad->index,
++                               strerror(errno));
++                    close(sfd);
++                    return -errno;
++                }
++
++                memset(&srcFmt, 0, sizeof(srcFmt));
+                 srcFmt.pad   = srcPad->index;
+                 srcFmt.which = V4L2_SUBDEV_FORMAT_ACTIVE;
+                 if (ioctl(sfd, VIDIOC_SUBDEV_G_FMT, &srcFmt) == 0) {
+-                    if (srcFmt.format.code != currentCode ||
+-                        srcFmt.format.width != currentW ||
+-                        srcFmt.format.height != currentH) {
+-                        qCInfo(mpLog, "MP: '%s':%d SOURCE → 0x%x %dx%d (was: 0x%x)",
+-                                qPrintable(entities[dstEntIdx].name), srcPad->index,
+-                                srcFmt.format.code, srcFmt.format.width, srcFmt.format.height,
+-                                currentCode);
+-                        currentCode = srcFmt.format.code;
+-                        currentW    = (int)srcFmt.format.width;
+-                        currentH    = (int)srcFmt.format.height;
+-                    }
++                    qCInfo(mpLog, "MP: '%s':%d SOURCE -> 0x%x %dx%d",
++                           qPrintable(entities[dstEntIdx].name), srcPad->index,
++                           srcFmt.format.code, srcFmt.format.width, srcFmt.format.height);
++                    currentCode = srcFmt.format.code;
++                    currentW    = (int)srcFmt.format.width;
++                    currentH    = (int)srcFmt.format.height;
+                 }
+             }
+-- 
+2.43.0
