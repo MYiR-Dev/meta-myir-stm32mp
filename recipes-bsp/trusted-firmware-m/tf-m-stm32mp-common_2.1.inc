@@ -90,24 +90,6 @@ SRCREV_FORMAT = "tfm"
 UPSTREAM_CHECK_GITTAGREGEX = "^TF-Mv(?P<pver>\d+(\.\d+)+)$"
 
 # ST Patches
-#SRC_URI:append = "\
-#    file://0001-v2.1.3-stm32mp-r2.patch.gz \
-#    file://0002-fix-stm32_risaf-crypto_hw-guard-for-D-variant.patch \
-#    file://0003-add-CRYPTO_HW_ACCELERATOR-define-to-platform-bl2.patch \
-#    file://0004-fix-mbedtls-hardware-poll-fallback-for-non-secure.patch \
-#    file://0007-fix-risaf-keep-clock-on-when-encryption-active.patch \
-#    file://0008-debug-crypto-init-trace-failure-point.patch \ 
-#    file://0009-ITS_RAM_FS-enable-ram-fs-for-ITS.patch \
-#"
-#SRC_URI:append = "\
-#    file://0001-v2.1.3-stm32mp-r2.patch.gz \
-#    file://0002-fix-stm32_risaf-crypto_hw-guard-for-D-variant.patch \
-#    file://0003-add-CRYPTO_HW_ACCELERATOR-define-to-platform-bl2.patch \
-#    file://0004-fix-mbedtls-hardware-poll-fallback-for-non-secure.patch \
-#    file://0009-ITS_RAM_FS-enable-ram-fs-for-ITS.patch \
-#    file://0011-fix-CRYPTO_HW_ACCELERATOR-conditional-on-TDCID.patch \
-#    file://0012-fix-rifsc-compile-unconditionally-for-SPE.patch \
-#"
 SRC_URI:append = "\
     file://0001-v2.1.3-stm32mp-r2.patch.gz \
     file://0002-fix-stm32_risaf-crypto_hw-guard-for-D-variant.patch \
