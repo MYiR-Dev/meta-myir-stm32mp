@@ -1,0 +1,86 @@
+From 4c0b45f3056c1ef962060222e97b46f65d7cd31e Mon Sep 17 00:00:00 2001
+From: MYIR <support@myirtech.com>
+Date: Sun, 20 Sep 2026 12:40:00 +0800
+Subject: [PATCH] camera: align MMAP queue with working v4l2src path
+
+The STM32 DCMIPP main capture path streams reliably with the GStreamer
+v4l2src setup, which uses four MMAP buffers and queues the size returned
+by QUERYBUF.  Mirror that setup in mxapp2 instead of using the reduced
+three-buffer queue with zero length and bytesused fields.
+
+Add an opt-in --camera-selftest argument so the exact application camera
+path can be exercised without GUI input during board validation.  Normal
+application startup is unchanged.
+
+Upstream-Status: Inappropriate [STM32MP25 board integration]
+
+Signed-off-by: MYIR <support@myirtech.com>
+---
+ abstractcamera.cpp |  5 +++++
+ camera_data.h      |  4 ++--
+ main.cpp           | 10 ++++++++++
+ 3 files changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/abstractcamera.cpp b/abstractcamera.cpp
+index 4b50a5c..37e312d 100644
+--- a/abstractcamera.cpp
++++ b/abstractcamera.cpp
+@@ -154,6 +154,11 @@ int AbstractCamera::start_capturing(camera_info& in_camera)
+         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+         buf.memory = V4L2_MEMORY_MMAP;
+         buf.index = i;
++        // Keep the capture queue identical to the working v4l2src path.
++        // DCMIPP accepts a zero payload, but preserving QUERYBUF's size
++        // avoids an empty initial buffer on this driver revision.
++        buf.length = in_camera.caputure_type.simple_plane[i].length;
++        buf.bytesused = buf.length;
+         if (0 > ioctl(in_camera.fd, VIDIOC_QBUF, &buf)) {
+             qCCritical(camLog, "CAM: QBUF failed: %d", errno);
+             return -1;
+diff --git a/camera_data.h b/camera_data.h
+index 6ce4170..e1b53b2 100644
+--- a/camera_data.h
++++ b/camera_data.h
+@@ -7,8 +7,8 @@
+ #include <QLoggingCategory>
+ 
+ Q_DECLARE_LOGGING_CATEGORY(camLog)
+-//默认申请3个buffer（低延迟预览，减少pipeline深度）
+-#define FRAMEBUFFER_COUNT 3
++// Match the stable GStreamer v4l2src queue depth on STM32 DCMIPP.
++#define FRAMEBUFFER_COUNT 4
+ #define CLEAR(x) memset(&(x), 0, sizeof(x))
+ #define v4l2_fourcc_i(a, b, c, d)\
+ ((__u32)(a) | ((__u32)(b) << 8) | ((__u32)(c) << 16) | ((__u32)(d) << 24))
+diff --git a/main.cpp b/main.cpp
+index 75fc755..134e58e 100644
+--- a/main.cpp
++++ b/main.cpp
+@@ -62,6 +62,8 @@ int main(int argc, char *argv[])
+ #endif
+     QApplication app(argc, argv);
+ 
++    const bool cameraSelfTest = app.arguments().contains(
++        QStringLiteral("--camera-selftest"));
+ 
+     app.setOrganizationName("MYiR_Electronics");
+     app.setApplicationName("MEasy_HMI");
+@@ -115,6 +117,16 @@ int main(int argc, char *argv[])
+     if (auto *window = qobject_cast<QWindow *>(engine.rootObjects().first()))
+         window->showMaximized();
+ 
++    if (cameraSelfTest) {
++        QTimer::singleShot(1000, show_image, [show_image]() {
++            show_image->startCamera();
++        });
++        QTimer::singleShot(7000, &app, [&app, show_image]() {
++            show_image->stopCamera();
++            app.quit();
++        });
++    }
++
+ 
+     return app.exec();
+ }
+-- 
+2.43.0

@@ -8,6 +8,7 @@ SRC_URI = "git://github.com/MYiR-Dev/mxapp.git;protocol=https;branch=MXAPP2-QT6-
            file://0003-camera-fix-stm32mp25-ov5640-preview.patch \
            file://0004-camera-preserve-dcmipp-main-input-size.patch \
            file://0005-camera-prefer-real-sensor-over-dcmipp-tpg.patch \
+           file://0006-camera-align-mmap-queue-with-v4l2src.patch \
 "
 SRCREV = "3da3aa1f8b108019ccacdcaecaae403de18173a5"
 
