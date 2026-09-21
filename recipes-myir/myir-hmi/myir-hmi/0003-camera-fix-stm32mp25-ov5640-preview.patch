@@ -1,0 +1,379 @@
+From 3c29a74ff2fb273259663c71d64d6de7df0bf835 Mon Sep 17 00:00:00 2001
+From: MYIR <support@myirtech.com>
+Date: Sun, 13 Sep 2026 12:00:00 +0800
+Subject: [PATCH] camera: fix STM32MP25 OV5640 preview
+
+The STM32MP25 DCMIPP graph exposes dump, main, auxiliary and metadata
+video nodes. Selecting the first /dev/video node and the shortest media
+graph path therefore picks the raw dump pipe instead of the main ISP
+pipe required to debayer OV5640 frames.
+
+Prefer dcmipp_main_capture, configure the OV5640 raw mode used by the
+reference camera scripts, scale at the main postprocessor, and support
+the little-endian RGB565 format exported by the DCMIPP capture driver.
+Only cache media setup after at least one pipeline was configured so a
+failed first attempt can be retried.
+
+Upstream-Status: Inappropriate [STM32MP25 board integration]
+
+Signed-off-by: MYIR <support@myirtech.com>
+---
+ abstractcamera.cpp      |  8 ++++++++
+ camera_qthread.cpp      |  3 ++-
+ cameraimageprovider.cpp | 29 ++++++++++++++++++++++-------
+ mediapipeline.cpp       | 99 ++++++++++++++++++++++++++++++++++++++++++++++----
+ 4 files changed, 123 insertions(+), 16 deletions(-)
+
+diff --git a/abstractcamera.cpp b/abstractcamera.cpp
+index 14db2b0..11d5aa2 100644
+--- a/abstractcamera.cpp
++++ b/abstractcamera.cpp
+@@ -29,6 +29,10 @@ int AbstractCamera::init_device(camera_info& in_camera)
+             pixformat_l.append("MJPG");
+             continue;
+         }
++        else if(fmtDesc.pixelformat == V4L2_PIX_FMT_RGB565) {
++            pixformat_l.append("RGBP");
++            continue;
++        }
+         else if(fmtDesc.pixelformat == v4l2_fourcc_i('R', 'G', 'B', 'R')) {
+             pixformat_l.append("RGBR");
+             continue;
+@@ -50,6 +54,10 @@ int AbstractCamera::init_device(camera_info& in_camera)
+     // 像素格式优先级选择
+     if(pixformat_l.contains(QString("MJPG")))
+         in_camera.pixelformat = V4L2_PIX_FMT_MJPEG;
++    // STM32 DCMIPP RGB16 is little-endian RGB565 (FOURCC RGBP).
++    // It matches the RGB888 media-bus output of the main postprocessor.
++    else if(pixformat_l.contains(QString("RGBP")))
++        in_camera.pixelformat = V4L2_PIX_FMT_RGB565;
+     else if(pixformat_l.contains(QString("RGBR")))
+         in_camera.pixelformat = V4L2_PIX_FMT_RGB565X;
+     else if(pixformat_l.contains(QString("YUYV")))
+diff --git a/camera_qthread.cpp b/camera_qthread.cpp
+index 632b2c5..456994f 100644
+--- a/camera_qthread.cpp
++++ b/camera_qthread.cpp
+@@ -218,7 +218,8 @@ void Camera_qthread::run() {
+       if (!img.isNull())
+         memcpy(img.bits(), onebuf, m_camera.width * m_camera.height * 3);
+-    } else if (m_camera.pixelformat == v4l2_fourcc_i('R', 'G', 'B', 'R')) {
++    } else if (m_camera.pixelformat == v4l2_fourcc_i('R', 'G', 'B', 'R') ||
++               m_camera.pixelformat == V4L2_PIX_FMT_RGB565) {
+       img = QImage(m_camera.width, m_camera.height, QImage::Format_RGB16);
+       if (!img.isNull())
+         memcpy(img.bits(), onebuf, m_camera.frame_length);
+     } else if (m_camera.pixelformat == v4l2_fourcc_i('N', 'V', '1', '2')) {
+diff --git a/cameraimageprovider.cpp b/cameraimageprovider.cpp
+index 775660b..ba50357 100644
+--- a/cameraimageprovider.cpp
++++ b/cameraimageprovider.cpp
+@@ -22,9 +22,21 @@
+ 
+ #include "cameraimageprovider.h"
+ #include <QDebug>
++#include <QFile>
+ #include <QFileInfo>
+ 
+ CameraImageProvider* CameraImageProvider::ImageProviderSingle = nullptr;
++
++static QString videoEntityName(const QString &devicePath)
++{
++    QFile nameFile(QString("/sys/class/video4linux/%1/name")
++                       .arg(QFileInfo(devicePath).fileName()));
++    if (!nameFile.open(QIODevice::ReadOnly | QIODevice::Text))
++        return {};
++
++    return QString::fromUtf8(nameFile.readAll()).trimmed();
++}
++
+ CameraImageProvider::CameraImageProvider(): QQuickImageProvider(QQuickImageProvider::Image)
+ {
+ 
+@@ -62,18 +74,13 @@ void showImage::captureImg(QString path)
+         qDebug()<<"save img:"<<path + ".jpg" << "fail";
+ }
+ //qml端点击打开摄像头后调用
+-//打开识别到第一个具有预览功能的/dev/video*节点
++//优先打开经过 ISP 的 DCMIPP main capture，失败时再探测其他节点
+ void showImage::startCamera()
+ {
+     QStringList cameraList_tmp = getCameraList();
+-    if(cameraList_tmp.size() > 10) {
+-        selectCamera(cameraList_tmp[0]);
+-        return ;
+-    }
+     foreach (QString cameraPath, cameraList_tmp) {
+         if(!thread->set_device(QString(cameraPath))){
+             qDebug() << "can't open camera" << cameraPath;
+-            // return;
+         }else{
+             qDebug() << cameraPath << "camera open successed";
+             thread->start();
+@@ -117,16 +124,23 @@ QStringList showImage::getCameraList()
+ {
+     QDir devDir("/dev");
+     QString devStr("/dev/");
+-    cameraList.clear();
+-    cameraList = devDir.entryList({"video*"}, QDir::System | QDir::Files);
+-    std::sort(cameraList.begin(), cameraList.end(), [](const QString &a, const QString &b) {
++    QStringList nodes = devDir.entryList({"video*"}, QDir::System | QDir::Files);
++    std::sort(nodes.begin(), nodes.end(), [](const QString &a, const QString &b) {
+         int index_A = a.mid(5).toInt();
+         int index_B = b.mid(5).toInt();
+         return index_A < index_B;
+     });
+-    for(int i = 0; i < cameraList.count(); i++){
+-        cameraList[i] = devStr + cameraList[i];
++
++    QStringList mainCapture;
++    QStringList otherNodes;
++    for (const QString &node : nodes) {
++        const QString path = devStr + node;
++        if (videoEntityName(path) == QStringLiteral("dcmipp_main_capture"))
++            mainCapture.append(path);
++        else
++            otherNodes.append(path);
+     }
++    cameraList = mainCapture + otherNodes;
+     return cameraList;
+ }
+ 
+diff --git a/mediapipeline.cpp b/mediapipeline.cpp
+index f0329da..cc5373e 100644
+--- a/mediapipeline.cpp
++++ b/mediapipeline.cpp
+@@ -44,6 +44,9 @@ Q_LOGGING_CATEGORY(mpLog, "mediapipeline", QtInfoMsg)
+ #ifndef MEDIA_BUS_FMT_RGB565_1X16
+ #define MEDIA_BUS_FMT_RGB565_1X16       0x1017
+ #endif
++#ifndef MEDIA_BUS_FMT_SBGGR8_1X8
++#define MEDIA_BUS_FMT_SBGGR8_1X8        0x3001
++#endif
+ #ifndef MEDIA_BUS_FMT_RGB888_1X24
+ #define MEDIA_BUS_FMT_RGB888_1X24       0x100a
+ #endif
+@@ -478,6 +481,17 @@ static bool buildPath(const QVector<MediaPipeline::TopoEntity> &entities,
+         return nullptr;
+     };
+ 
++    // The STM32MP25 graph exposes dump/main/aux capture nodes. OV5640 raw
++    // frames require the main ISP path, not the shorter dump path.
++    int preferredCaptureIdx = -1;
++    for (int i = 0; i < entities.size(); i++) {
++        if (entities[i].isVideoDevice &&
++            entities[i].name == QStringLiteral("dcmipp_main_capture")) {
++            preferredCaptureIdx = i;
++            break;
++        }
++    }
++
+     // BFS
+     QQueue<unsigned int> q;
+     QSet<unsigned int> vis;
+@@ -491,7 +505,8 @@ static bool buildPath(const QVector<MediaPipeline::TopoEntity> &entities,
+     while (!q.isEmpty()) {
+         unsigned int curId = q.dequeue();
+         int curIdx = eIdx.value(curId, -1);
+-        if (curIdx >= 0 && entities[curIdx].isVideoDevice) {
++        if (curIdx >= 0 && entities[curIdx].isVideoDevice &&
++            (preferredCaptureIdx < 0 || curIdx == preferredCaptureIdx)) {
+             captureIdx = curIdx;
+             break;
+         }
+@@ -561,6 +576,65 @@ static bool buildPath(const QVector<MediaPipeline::TopoEntity> &entities,
+     return true;
+ }
+ 
++// Disable stale mutable DCMIPP input branches left enabled by another user.
++// The main ISP link is immutable; dump and auxiliary links are mutable.
++static int disableDcmippCompetingLinks(
++    int mediaFd,
++    const QVector<MediaPipeline::TopoEntity> &entities,
++    const QVector<MediaPipeline::TopoPad> &pads,
++    const QVector<MediaPipeline::TopoLink> &links,
++    const QVector<MediaPipeline::PathHop> &path)
++{
++    QSet<unsigned int> pathLinkIds;
++    for (const auto &hop : path) {
++        if (hop.link)
++            pathLinkIds.insert(hop.link->id);
++    }
++
++    auto padById = [&](unsigned int pid) -> const MediaPipeline::TopoPad* {
++        for (const auto &p : pads) if (p.id == pid) return &p;
++        return nullptr;
++    };
++    auto entityById = [&](unsigned int eid) -> const MediaPipeline::TopoEntity* {
++        for (const auto &e : entities) if (e.id == eid) return &e;
++        return nullptr;
++    };
++
++    for (const auto &link : links) {
++        if (!(link.flags & MEDIA_LNK_FL_ENABLED) ||
++            (link.flags & MEDIA_LNK_FL_IMMUTABLE) ||
++            pathLinkIds.contains(link.id))
++            continue;
++
++        const MediaPipeline::TopoPad *sp = padById(link.srcId);
++        const MediaPipeline::TopoPad *dp = padById(link.dstId);
++        if (!sp || !dp)
++            continue;
++        const MediaPipeline::TopoEntity *src = entityById(sp->entityId);
++        const MediaPipeline::TopoEntity *dst = entityById(dp->entityId);
++        if (!src || !dst || src->name != QStringLiteral("dcmipp_input"))
++            continue;
++
++        struct media_link_desc ld;
++        memset(&ld, 0, sizeof(ld));
++        ld.source.entity = src->id;
++        ld.source.index = sp->index;
++        ld.source.flags = MEDIA_PAD_FL_SOURCE;
++        ld.sink.entity = dst->id;
++        ld.sink.index = dp->index;
++        ld.sink.flags = MEDIA_PAD_FL_SINK;
++        ld.flags = 0;
++        if (ioctl(mediaFd, MEDIA_IOC_SETUP_LINK, &ld) < 0) {
++            qCWarning(mpLog, "MP: disable competing link %s->%s failed: %s",
++                      qPrintable(src->name), qPrintable(dst->name), strerror(errno));
++            return -errno;
++        }
++        qCInfo(mpLog, "MP: disabled competing link '%s'->'%s'",
++               qPrintable(src->name), qPrintable(dst->name));
++    }
++    return 0;
++}
++
+ // ============================================================================
+ // enableLinks — 通用链路使能
+ //
+@@ -773,27 +847,43 @@ static int propagateFormats(int mediaFd,
+     // ---- 第 1 步：从 sensor SOURCE pad 读取当前格式 ----
+     int sensorIdx = path[0].srcEntIdx;
+     const MediaPipeline::TopoPad *firstSrcPad = padById(path[0].srcPadId);
++    const bool isOv5640 = entities[sensorIdx].name.contains(
++        QStringLiteral("ov5640"), Qt::CaseInsensitive);
+     uint32_t currentCode = 0;
+ 
+     {
+         int sfd = openSubdev(entities[sensorIdx].devMajor, entities[sensorIdx].devMinor);
+-        if (sfd >= 0) {
+-            if (firstSrcPad) {
+-                struct v4l2_subdev_format f;
+-                memset(&f, 0, sizeof(f));
+-                f.pad   = firstSrcPad->index;
+-                f.which = V4L2_SUBDEV_FORMAT_ACTIVE;
+-                if (ioctl(sfd, VIDIOC_SUBDEV_G_FMT, &f) == 0) {
+-                    currentCode = f.format.code;
+-                    // ★ 只取 sensor 的 mbus code，分辨率用调用方指定的 desiredW×desiredH
+-                    // sensor 默认分辨率（如 640x480）不应覆盖用户期望值（如 1280x720）
+-                    qCInfo(mpLog, "MP: sensor '%s':%d mbus=0x%x (request %dx%d)",
+-                            qPrintable(entities[sensorIdx].name),
+-                            firstSrcPad->index, currentCode, currentW, currentH);
+-                }
++        if (sfd >= 0 && firstSrcPad) {
++            struct v4l2_subdev_format f;
++            memset(&f, 0, sizeof(f));
++            f.pad   = firstSrcPad->index;
++            f.which = V4L2_SUBDEV_FORMAT_ACTIVE;
++            if (ioctl(sfd, VIDIOC_SUBDEV_G_FMT, &f) == 0)
++                currentCode = f.format.code;
++
++            if (isOv5640) {
++                memset(&f, 0, sizeof(f));
++                f.pad = firstSrcPad->index;
++                f.which = V4L2_SUBDEV_FORMAT_ACTIVE;
++                f.format.code = MEDIA_BUS_FMT_SBGGR8_1X8;
++                f.format.width = 1280;
++                f.format.height = 720;
++                f.format.field = V4L2_FIELD_NONE;
++                if (ioctl(sfd, VIDIOC_SUBDEV_S_FMT, &f) < 0) {
++                    qCCritical(mpLog, "MP: OV5640 raw S_FMT failed: %s", strerror(errno));
++                    close(sfd);
++                    return -errno;
++                }
++                currentCode = f.format.code;
++                currentW = f.format.width;
++                currentH = f.format.height;
+             }
++            qCInfo(mpLog, "MP: sensor '%s':%d -> mbus=0x%x %dx%d",
++                   qPrintable(entities[sensorIdx].name), firstSrcPad->index,
++                   currentCode, currentW, currentH);
++        }
++        if (sfd >= 0)
+             close(sfd);
+-        }
+     }
+ 
+     if (currentCode == 0) {
+@@ -1053,8 +1143,8 @@ static int propagateFormats(int mediaFd,
+                     sel.target = V4L2_SEL_TGT_COMPOSE;
+                     sel.r.left   = 0;
+                     sel.r.top    = 0;
+-                    sel.r.width  = currentW;
+-                    sel.r.height = currentH;
++                    sel.r.width  = desiredW;
++                    sel.r.height = desiredH;
+                     sel.flags = 0;
+ 
+                     if (ioctl(sfd, VIDIOC_SUBDEV_S_SELECTION, &sel) < 0) {
+@@ -1064,7 +1154,7 @@ static int propagateFormats(int mediaFd,
+                     } else {
+                         qCInfo(mpLog, "MP: '%s' COMPOSE pad%d → %dx%d",
+                                 qPrintable(entities[procIdx].name),
+-                                procSinkPadIdx, currentW, currentH);
++                                procSinkPadIdx, desiredW, desiredH);
+                     }
+                 }
+ 
+@@ -1080,8 +1170,8 @@ static int propagateFormats(int mediaFd,
+                     memset(&f, 0, sizeof(f));
+                     f.pad         = procSrcPadIdx;
+                     f.which       = V4L2_SUBDEV_FORMAT_ACTIVE;
+-                    f.format.width  = currentW;
+-                    f.format.height = currentH;
++                    f.format.width  = desiredW;
++                    f.format.height = desiredH;
+                     f.format.code   = srcCode;
+                     f.format.field  = V4L2_FIELD_NONE;
+ 
+@@ -1175,6 +1265,12 @@ bool MediaPipeline::setupMediaDevice(const QString &node,
+         return false;
+     }
+ 
++    // Match launch_camera_control_mp25.sh: keep the raw dump branch off.
++    if (disableDcmippCompetingLinks(mfd, entities, pads, links, path) < 0) {
++        close(mfd);
++        return false;
++    }
++
+     // 阶段 4: 使能链路
+     if (enableLinks(mfd, entities, pads, path) < 0) {
+         qCWarning(mpLog, "MP: failed to enable links");
+@@ -1218,6 +1314,8 @@ bool MediaPipeline::setupMediaDevice(const QString &node,
+             if (ioctl(vfd, VIDIOC_G_FMT, &vfmt) == 0) {
+                 vfmt.fmt.pix.width  = cfg.width;
+                 vfmt.fmt.pix.height = cfg.height;
++                if (capEnt.name == QStringLiteral("dcmipp_main_capture"))
++                    vfmt.fmt.pix.pixelformat = V4L2_PIX_FMT_RGB565;
+                 if (ioctl(vfd, VIDIOC_S_FMT, &vfmt) == 0) {
+                     cfg.pixelFormat = vfmt.fmt.pix.pixelformat;
+                     cfg.width  = vfmt.fmt.pix.width;
+@@ -1247,7 +1345,6 @@ MediaPipeline::setupAll(int desiredWidth, int desiredHeight)
+             allResults.append(it.value());
+         return allResults;
+     }
+-    s_configured = true;
+ 
+     QDir d("/dev");
+     QStringList nodes = d.entryList({"media*"}, QDir::System);
+@@ -1268,6 +1365,7 @@ MediaPipeline::setupAll(int desiredWidth, int desiredHeight)
+         }
+     }
+ 
++    s_configured = !s_configs.isEmpty();
+     qCInfo(mpLog, "MP: configured %d pipeline(s)", (int)allResults.size());
+     return allResults;
+ }
+-- 
+2.43.0
