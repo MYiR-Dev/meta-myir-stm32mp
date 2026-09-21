@@ -1,0 +1,38 @@
+From a220606d5a3f6fe4b06e594605265f757f3b02a0 Mon Sep 17 00:00:00 2001
+From: MYIR Secure Boot <support@myirtech.com>
+Date: Mon, 7 Sep 2026 02:10:00 +0800
+Subject: [PATCH] dts: stm32mp25: enable crypto devices for secure boot
+
+Enable PKA and SAES in the MYIR OP-TEE device tree. The Yocto recipe
+applies this patch only when SIGN_ENABLE is set to 1.
+
+Signed-off-by: MYIR Secure Boot <support@myirtech.com>
+---
+ core/arch/arm/dts/myb-stm32mp257x-base.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/core/arch/arm/dts/myb-stm32mp257x-base.dtsi b/core/arch/arm/dts/myb-stm32mp257x-base.dtsi
+index bbf5401..bb5f398 100644
+--- a/core/arch/arm/dts/myb-stm32mp257x-base.dtsi
++++ b/core/arch/arm/dts/myb-stm32mp257x-base.dtsi
+@@ -368,7 +368,7 @@
+ };
+ 
+ &pka {
+-	status = "disabled";
++	status = "okay";
+ };
+ 
+ &pwr {
+@@ -462,7 +462,7 @@
+ };
+ 
+ &saes {
+-	status = "disabled";
++	status = "okay";
+ };
+ 
+ &scmi_regulator {
+-- 
+2.34.1
+
