@@ -1,0 +1,39 @@
+From 2b620ef8a2236e091bea060891970f750f6b9e06 Mon Sep 17 00:00:00 2001
+From: MYIR Secure Boot <support@myirtech.com>
+Date: Mon, 7 Sep 2026 02:10:00 +0800
+Subject: [PATCH] feat(stm32mp2): enable security peripherals for trusted boot
+
+The STM32MP2 crypto library initializes SAES and PKA when trusted board
+boot is enabled. Enable both peripherals for the MYIR board. The Yocto
+recipe applies this patch only when SIGN_ENABLE is set to 1.
+
+Signed-off-by: MYIR Secure Boot <support@myirtech.com>
+---
+ fdts/myb-stm32mp257x-base.dtsi | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/fdts/myb-stm32mp257x-base.dtsi b/fdts/myb-stm32mp257x-base.dtsi
+index 94d36c0..f2ccb66 100644
+--- a/fdts/myb-stm32mp257x-base.dtsi
++++ b/fdts/myb-stm32mp257x-base.dtsi
+@@ -201,7 +201,7 @@
+ };
+ 
+ &pka {
+-	status = "disabled";
++	status = "okay";
+ };
+ 
+ &rng {
+@@ -209,7 +209,7 @@
+ };
+ 
+ &saes {
+-	status = "disabled";
++	status = "okay";
+ };
+ 
+ &sdmmc1 {
+-- 
+2.34.1
+
