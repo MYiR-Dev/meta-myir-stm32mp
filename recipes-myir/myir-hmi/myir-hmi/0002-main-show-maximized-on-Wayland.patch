@@ -1,0 +1,40 @@
+From 3e8f151a0eb0149501a1b25aa20a79ceeed2cd5d Mon Sep 17 00:00:00 2001
+From: MYIR <support@myirtech.com>
+Date: Thu, 10 Sep 2026 10:20:00 +0800
+Subject: [PATCH] main: show the application maximized on Wayland
+
+Start the application in the same maximized state produced by clicking the
+window's maximize button. This fills the desktop work area while retaining
+the normal window decorations and controls.
+
+Upstream-Status: Inappropriate [product configuration]
+
+Signed-off-by: MYIR <support@myirtech.com>
+---
+ main.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/main.cpp b/main.cpp
+index f0c9e56..f26a865 100755
+--- a/main.cpp
++++ b/main.cpp
+@@ -22,6 +22,7 @@
+ 
+ #include <QApplication>
+ #include <QGuiApplication>
++#include <QWindow>
+ #include <QQmlApplicationEngine>
+ #include <QFontDatabase>
+ #include <QFont>
+@@ -101,6 +102,9 @@ int main(int argc, char *argv[])
+     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+     if (engine.rootObjects().isEmpty())
+         return -1;
++    if (auto *window = qobject_cast<QWindow *>(engine.rootObjects().first()))
++        window->showMaximized();
++
+ 
+     return app.exec();
+ }
+-- 
+2.43.0

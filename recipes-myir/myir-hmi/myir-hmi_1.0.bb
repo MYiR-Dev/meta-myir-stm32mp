@@ -4,6 +4,7 @@ LICENSE = "CLOSED"
 
 SRC_URI = "git://github.com/MYiR-Dev/mxapp.git;protocol=https;branch=MXAPP2-QT6-IMX9X \
            file://0001-mediapipeline-use-Linux-6.6-subdev-routing-API.patch \
+           file://0002-main-show-maximized-on-Wayland.patch \
 "
 SRCREV = "3da3aa1f8b108019ccacdcaecaae403de18173a5"
 
