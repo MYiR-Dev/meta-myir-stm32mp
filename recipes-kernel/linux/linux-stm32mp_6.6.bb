@@ -24,7 +24,7 @@ LINUX_TARNAME = "${LINUX_TARBASE}.tar.xz"
 
 KERNEL_SRC_URI ?= "git:///home/myir/bsp/myir-st-linux;protocol=file;branch=develop_6.6.129"
 SRC_URI = "${KERNEL_SRC_URI}"
-SRCREV = "d3f536e00fabb94ac94c6fff691fe8b874a74243"
+SRCREV = "0467ac85a7904be16dc1c81b89ceef59ecf0d159"
 
 LINUX_TARGET = "stm32mp"
 LINUX_RELEASE = "r3.1"
