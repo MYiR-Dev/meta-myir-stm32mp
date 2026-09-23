@@ -10,9 +10,16 @@ SRC_URI = " \
 
 DEPENDS += "u-boot-fw-utils"
 
+UBOOT_FW_ENV_DEFAULT_CONFIG ??= ""
+
 do_install () {
     install -d ${D}${sysconfdir}
     install -m 0644 ${WORKDIR}/fw_env.config.* ${D}${sysconfdir}/
+
+    if [ -n "${UBOOT_FW_ENV_DEFAULT_CONFIG}" ]; then
+        ln -sf fw_env.config.${UBOOT_FW_ENV_DEFAULT_CONFIG} \
+            ${D}${sysconfdir}/fw_env.config
+    fi
 }
 
 FILES:${PN} += "${sysconfdir}/"
