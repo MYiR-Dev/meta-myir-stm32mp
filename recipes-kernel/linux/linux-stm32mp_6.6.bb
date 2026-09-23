@@ -26,6 +26,8 @@ KERNEL_SRC_URI ?= "git:///home/myir/bsp/myir-st-linux;protocol=file;branch=devel
 SRC_URI = "${KERNEL_SRC_URI}"
 SRCREV = "0467ac85a7904be16dc1c81b89ceef59ecf0d159"
 
+SRC_URI:append:myd-lf25x = " file://${LINUX_VERSION}/0001-arm64-dts-myir-enable-cryp1.patch"
+
 LINUX_TARGET = "stm32mp"
 LINUX_RELEASE = "r3.1"
 
