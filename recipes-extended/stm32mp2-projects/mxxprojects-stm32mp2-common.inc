@@ -1,8 +1,8 @@
 LICENSE = "Apache-2.0 & MIT & BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://License.md;md5=f2f110de9c50e738bfd1e15ef52181c4"
 
-#SRC_URI = "git://github.com/STMicroelectronics/STM32CubeMP2.git;protocol=https;nobranch=1"
-SRC_URI = "git:///home/myir/bsp/m33td;protocol=file;branch=develop_m33"
+SRC_URI = "git://github.com/myd-ld25x/mxxprojects.git;protocol=https;branch=develop_m33"
+#SRC_URI = "git:///home/myir/bsp/m33td;protocol=file;branch=develop_m33"
 #SRCREV  = "38732d24f8928af2dbcd9491f92390efbaec78d6"
 SRCREV  = "8f2aeac3c34315003297eb1edf94b5f063ba1200"
 

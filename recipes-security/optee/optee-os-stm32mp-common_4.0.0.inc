@@ -4,9 +4,9 @@ LICENSE = "BSD-2-Clause & BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=c1f21c4f72f372ef38a5a4aee55ec173"
 
 #SRC_URI = "git://github.com/OP-TEE/optee_os.git;protocol=https;branch=master"
-SRC_URI = "git:///home/myir/bsp/myir-st-optee;protocol=file;branch=develop_v4.0"
+SRC_URI = "git://github.com/myd-ld25x/myir-st-optee.git;protocol=https;branch=develop_v4.0"
 #SRCREV = "2a5b1d1232f582056184367fb58a425ac7478ec6"
-SRCREV = "d33069659bee7bd77a2eb68cafad21924921c9b2"
+SRCREV = "d445bd773213b2bb26d6cb17996e040468467bcf"
 
 SRC_URI += " \
     file://fonts.tar.gz;subdir=git;name=fonts \
