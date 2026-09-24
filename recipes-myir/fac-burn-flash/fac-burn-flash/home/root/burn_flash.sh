@@ -209,7 +209,6 @@ burn_boot_rootfs()
 {
 #	/home/root//flash.sh
 	dd if=${BOOTFS_FILE} of=${DRIVE}p6 iflag=nocache oflag=nocache bs=1M
-#	sudo dd if=stm32mp2_image/st-image-bootfs-openstlinux-weston-stm32mp2.ext4 of=/dev/mmcblk1p6 iflag=nocache oflag=nocache bs=1M
 	cmd_check $? "Update boot rootfs"
 	sync
 }
@@ -327,7 +326,7 @@ while [ $i -lt 8 ]; do
     		echo "Mount command failed"
     		burn_boot_rootfs
 	fi
-	if [ $i -eq 7]; then
+	if [ $i -eq 7 ]; then
 		echo ">>>[${#boot_rootfs_failed}]${boot_rootfs_failed}"
 	fi
 	((i++))

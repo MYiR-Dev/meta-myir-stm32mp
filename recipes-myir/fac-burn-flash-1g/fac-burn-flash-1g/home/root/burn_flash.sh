@@ -116,9 +116,8 @@ check_file()
 
 mkfs_emmc_all()                                
 {                                          
-	mkfs.ext4 ${DRIVE} <<EOF
-	y
-EOF
+	sgdisk --zap-all ${DRIVE}
+	cmd_check $? "Erase Emmc partition table"
 }              
 
 fdisk_emmc(){
@@ -131,17 +130,17 @@ fdisk_emmc(){
 
 mkfs_emmc()
 {
-	mkfs.ext4 ${DRIVE}p6 <<EOF
-	y
+	mkfs.ext4 ${DRIVE}p${bootfs_part} <<EOF
+y
 EOF
-	mkfs.ext4 ${DRIVE}p7 <<EOF
-	y
+	mkfs.ext4 ${DRIVE}p${vendorfs_part} <<EOF
+y
 EOF
-	mkfs.ext4 ${DRIVE}p8 <<EOF
-	y
+	mkfs.ext4 ${DRIVE}p${rootfs_part} <<EOF
+y
 EOF
-	mkfs.ext4 ${DRIVE}p9 <<EOF
-	y
+	mkfs.ext4 ${DRIVE}p${userfs_part} <<EOF
+y
 EOF
 }
 
@@ -208,8 +207,7 @@ enable_emmc()
 burn_boot_rootfs()
 {
 #	/home/root//flash.sh
-	dd if=${BOOTFS_FILE} of=${DRIVE}p6 iflag=nocache oflag=nocache bs=1M
-#	sudo dd if=stm32mp2_image/st-image-bootfs-openstlinux-weston-stm32mp2.ext4 of=/dev/mmcblk1p6 iflag=nocache oflag=nocache bs=1M
+	dd if=${BOOTFS_FILE} of=${DRIVE}p${bootfs_part} iflag=nocache oflag=nocache bs=1M
 	cmd_check $? "Update boot rootfs"
 	sync
 }
@@ -217,21 +215,21 @@ burn_boot_rootfs()
 
 burn_vendor_rootfs()
 {
-	dd if=${VENDORFS_FILE} of=${DRIVE}p7 bs=1M conv=fsync
+	dd if=${VENDORFS_FILE} of=${DRIVE}p${vendorfs_part} bs=1M conv=fsync
 	cmd_check $? "Update vendor rootfs"
 	sync
 }
 
 burn_rootfs()
 {
-	dd if=${ROOTFS_FILE} of=${DRIVE}p8 bs=1M conv=fsync
+	dd if=${ROOTFS_FILE} of=${DRIVE}p${rootfs_part} bs=1M conv=fsync
 	cmd_check $? "Update rootfs"
 	sync
 }
 
 burn_user_rootfs()
 {
-	dd if=${USERFS_FILE} of=${DRIVE}p9 bs=1M conv=fsync
+	dd if=${USERFS_FILE} of=${DRIVE}p${userfs_part} bs=1M conv=fsync
 	cmd_check $? "Update user rootfs"
 	sync
 }
@@ -240,32 +238,32 @@ burn_user_rootfs()
 
 resize2fs_emmc()
 {
-	e2fsck -f  ${DRIVE}p6 <<EOF
-	y
+	e2fsck -f  ${DRIVE}p${bootfs_part} <<EOF
+y
 EOF
-	resize2fs   ${DRIVE}p6 <<EOF
-	y
-EOF
-
-	e2fsck -f  ${DRIVE}p7 <<EOF
-	y
-EOF
-	resize2fs   ${DRIVE}p7 <<EOF
-	y
+	resize2fs   ${DRIVE}p${bootfs_part} <<EOF
+y
 EOF
 
-	e2fsck -f  ${DRIVE}p8 <<EOF
-	y
+	e2fsck -f  ${DRIVE}p${vendorfs_part} <<EOF
+y
 EOF
-	resize2fs   ${DRIVE}p8 <<EOF
-	y
+	resize2fs   ${DRIVE}p${vendorfs_part} <<EOF
+y
 EOF
 
-	e2fsck -f  ${DRIVE}p9 <<EOF
-	y
+	e2fsck -f  ${DRIVE}p${rootfs_part} <<EOF
+y
 EOF
-	resize2fs   ${DRIVE}p9 <<EOF
-	y
+	resize2fs   ${DRIVE}p${rootfs_part} <<EOF
+y
+EOF
+
+	e2fsck -f  ${DRIVE}p${userfs_part} <<EOF
+y
+EOF
+	resize2fs   ${DRIVE}p${userfs_part} <<EOF
+y
 EOF
 
   	sync
@@ -275,6 +273,10 @@ EOF
 
 led &
 LED_PID=$!
+
+for image_file in ${FSBLA_FILE} ${META_FILE} ${FIP_FILE} ${BOOTFS_FILE} ${VENDORFS_FILE} ${ROOTFS_FILE} ${USERFS_FILE}; do
+	check_file ${image_file}
+done
 
 
 echo "---------------------------start mkfs_emmc_all ---------------------------"   > /dev/ttySTM0
@@ -318,7 +320,7 @@ echo "---------------------------start boot rootfs ---------------------------" 
 burn_boot_rootfs
 i=1
 while [ $i -lt 8 ]; do
-	mount ${DRIVE}p6 /mnt
+	mount ${DRIVE}p${bootfs_part} /mnt
 	if [ $? -eq 0 ]; then
     		echo "Mount boot_rootfs successfully"
     		umount /mnt
@@ -327,7 +329,7 @@ while [ $i -lt 8 ]; do
     		echo "Mount command failed"
     		burn_boot_rootfs
 	fi
-	if [ $i -eq 7]; then
+	if [ $i -eq 7 ]; then
 		echo ">>>[${#boot_rootfs_failed}]${boot_rootfs_failed}"
 	fi
 	((i++))

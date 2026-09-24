@@ -17,6 +17,8 @@ SRC_URI = "file://home/root/burn_flash.sh \
            file://licenses/GPL-2 \
           "
 
+do_install[depends] += "myir-image-emmc:do_image_complete"
+
 do_install(){
   install -d ${D}${systemd_system_unitdir}
 	install -d ${D}/home/root/
@@ -27,10 +29,10 @@ do_install(){
        	install -m 755 ${WORKDIR}/home/root/burn_flash.sh ${D}/home/root/burn_flash.sh
        	install -m 755 ${WORKDIR}/home/root/fdisk_emmc.sh ${D}/home/root/fdisk_emmc.sh
         install -m 755 ${WORKDIR}/home/root/Manifest ${D}/home/root/ld25x_images/Manifest
-	install -m 755 ${DEPLOY_DIR_IMAGE}/myir-image-full-openstlinux-weston-${MACHINENAME}.rootfs.ext4  ${D}/home/root/ld25x_images/myir-image-full.ext4
-	install -m 755 ${DEPLOY_DIR_IMAGE}/st-image-bootfs-openstlinux-weston-${MACHINENAME}.bootfs.ext4  ${D}/home/root/ld25x_images/st-image-bootfs.ext4
-	install -m 755 ${DEPLOY_DIR_IMAGE}/st-image-userfs-openstlinux-weston-${MACHINENAME}.userfs.ext4  ${D}/home/root/ld25x_images/st-image-userfs.ext4
-	install -m 755 ${DEPLOY_DIR_IMAGE}/st-image-vendorfs-openstlinux-weston-${MACHINENAME}.vendorfs.ext4  ${D}/home/root/ld25x_images/st-image-vendorfs.ext4
+	install -m 644 ${DEPLOY_DIR_IMAGE}/myir-image-emmc-openstlinux-weston-${MACHINENAME}.splitted-rootfs.ext4 ${D}/home/root/ld25x_images/myir-image-emmc.splitted-rootfs.ext4
+	install -m 644 ${DEPLOY_DIR_IMAGE}/myir-image-emmc-openstlinux-weston-${MACHINENAME}.splitted-bootfs.ext4 ${D}/home/root/ld25x_images/myir-image-emmc.splitted-bootfs.ext4
+	install -m 644 ${DEPLOY_DIR_IMAGE}/myir-image-emmc-openstlinux-weston-${MACHINENAME}.splitted-userfs.ext4 ${D}/home/root/ld25x_images/myir-image-emmc.splitted-userfs.ext4
+	install -m 644 ${DEPLOY_DIR_IMAGE}/myir-image-emmc-openstlinux-weston-${MACHINENAME}.splitted-vendorfs.ext4 ${D}/home/root/ld25x_images/myir-image-emmc.splitted-vendorfs.ext4
 
 	install -m 755 ${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/tf-a-myb-stm32mp257x-2GB-optee-emmc.stm32 ${D}/home/root/ld25x_images/tf-a-myb-stm32mp257x-2GB-optee-emmc.stm32
 	install -m 755 ${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/metadata.bin ${D}/home/root/ld25x_images/metadata.bin
