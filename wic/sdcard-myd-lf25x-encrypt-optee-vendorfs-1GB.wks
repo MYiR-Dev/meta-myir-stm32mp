@@ -1,14 +1,14 @@
-# MYIR MYD-LF25X 1GB eMMC image with encrypted and signed boot firmware.
+# MYIR MYD-LF25X 1GB SD card image with encrypted and signed boot firmware.
 # The first-stage partitions must remain GPT partitions for STM32MP boot ROM.
 
-part fsbla1 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fsbla1 --sourceparams="file=${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/tf-a-myb-stm32mp257x-1GB-optee-emmc_Encrypted_Signed.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K --align 17
-part fsbla2 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fsbla2 --sourceparams="file=${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/tf-a-myb-stm32mp257x-1GB-optee-emmc_Encrypted_Signed.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
+part fsbla1 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fsbla1 --sourceparams="file=${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/tf-a-myb-stm32mp257x-1GB-optee-sdcard_Encrypted_Signed.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K --align 17
+part fsbla2 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fsbla2 --sourceparams="file=${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/tf-a-myb-stm32mp257x-1GB-optee-sdcard_Encrypted_Signed.stm32" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
 
 part metadata1 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=metadata1 --sourceparams="file=${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/metadata.bin" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
 part metadata2 --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=metadata2 --sourceparams="file=${DEPLOY_DIR_IMAGE}/arm-trusted-firmware/metadata.bin" --ondisk mmcblk --part-type 0x8301 --fixed-size 256K
 
-part fip-a --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fip-a --sourceparams="file=${DEPLOY_DIR_IMAGE}/fip/fip-myb-stm32mp257x-1GB-optee-emmc_Encrypted_Signed.bin" --ondisk mmcblk --part-type 19d5df83-11b0-457b-be2c-7559c13142a5 --fixed-size 4096K --uuid 4fd84c93-54ef-463f-a7ef-ae25ff887087
-part fip-b --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fip-b --sourceparams="file=${DEPLOY_DIR_IMAGE}/fip/fip-myb-stm32mp257x-1GB-optee-emmc_Encrypted_Signed.bin" --ondisk mmcblk --part-type 19d5df83-11b0-457b-be2c-7559c13142a5 --fixed-size 4096K --uuid 09c54952-d5bf-45af-acee-335303766fb3
+part fip-a --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fip-a --sourceparams="file=${DEPLOY_DIR_IMAGE}/fip/fip-myb-stm32mp257x-1GB-optee-sdcard_Encrypted_Signed.bin" --ondisk mmcblk --part-type 19d5df83-11b0-457b-be2c-7559c13142a5 --fixed-size 4096K --uuid 4fd84c93-54ef-463f-a7ef-ae25ff887087
+part fip-b --source rawcopy --fstype=ext4 --fsoptions "noauto" --part-name=fip-b --sourceparams="file=${DEPLOY_DIR_IMAGE}/fip/fip-myb-stm32mp257x-1GB-optee-sdcard_Encrypted_Signed.bin" --ondisk mmcblk --part-type 19d5df83-11b0-457b-be2c-7559c13142a5 --fixed-size 4096K --uuid 09c54952-d5bf-45af-acee-335303766fb3
 
 part u-boot-env --source empty --part-name=u-boot-env --ondisk mmcblk --part-type 0x8301 --fixed-size 512K
 part /boot --source rootfs --rootfs-dir=${IMAGE_ROOTFS}/boot --ondisk mmcblk --fstype=ext4 --label bootfs --active --fixed-size 64M --extra-space 0
