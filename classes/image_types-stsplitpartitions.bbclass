@@ -439,7 +439,7 @@ stsplitted_partition_create_fs() {
     bbnote "image_name -> \"${image_name}\""
 
     # calculate size of partition
-    partition_size=$(du --apparent-size -Pks ${splitted_directory} | cut -f 1)
+    partition_size=$(du --apparent-size -Pks ${src_splitted_part} | cut -f 1)
     # add extra space
     calculate_size $label $size ${src_splitted_part}
     # hack for little partition like bootfs, vendorfs
@@ -688,4 +688,3 @@ IMAGE_CMD:stsplitpartitions () {
         done
     fi
 }
-

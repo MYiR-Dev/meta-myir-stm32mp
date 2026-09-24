@@ -5,7 +5,7 @@ LICENSE = "MIT"
 IMAGE_FSTYPES = "ext4"
 
 # Image mount point used on image
-IMAGE_PARTITION_MOUNTPOINT = "/user/local"
+IMAGE_PARTITION_MOUNTPOINT = "/usr/local"
 
 include recipes-st/images/st-image-partitions.inc
 
@@ -18,4 +18,3 @@ IMAGE_ROOTFS_MAXSIZE = ""
 PACKAGE_INSTALL = " \
     packagegroup-st-demo \
     "
-

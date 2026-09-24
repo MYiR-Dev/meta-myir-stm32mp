@@ -24,7 +24,7 @@ LINUX_TARNAME = "${LINUX_TARBASE}.tar.xz"
 
 KERNEL_SRC_URI ?= "git:///home/myir/bsp/myir-st-linux;protocol=file;branch=develop_6.6.129"
 SRC_URI = "${KERNEL_SRC_URI}"
-SRCREV = "0467ac85a7904be16dc1c81b89ceef59ecf0d159"
+SRCREV = "7821fed4e8eb8fca0f72f53c737654420b580b64"
 
 SRC_URI:append:myd-lf25x = " file://${LINUX_VERSION}/0001-arm64-dts-myir-enable-cryp1.patch"
 
