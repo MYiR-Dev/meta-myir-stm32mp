@@ -15,7 +15,7 @@ CVE_PRODUCT = "arm:arm-trusted-firmware \
 #SRC_URI += " \
 #    file://0001-v2.10-stm32mp-r3.1.patch \
 #     "
-SRC_URI = "git://github.com/myd-ld25x/myir-st-tfa.git;protocol=https;branch=develop_v2.10"
+SRC_URI = "git://github.com/MYiR-Dev/myir-st-arm-trusted-firmware.git;protocol=https;branch=develop_v2.10_r3.1"
 SRCREV = "822a4c9234e083bfd21dd367451353fe05d56354"
 
 SRC_URI += "${@bb.utils.contains('SIGN_ENABLE', '1', 'file://0002-myir-enable-security-peripherals-for-tbb.patch', '', d)}"

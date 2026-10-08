@@ -2,9 +2,7 @@ UMMARY = "Provides Device Tree files for STM32MP boards"
 LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/GPL-2.0-only;md5=801f80980d171dd6425610833a22dbe6"
 
-SRC_URI = "git://github.com/myd-ld25x/myir-dt-stm32mp.git;protocol=https;branch=v6-stm32mp"
-#SRC_URI = "git:///home/myir/bsp/myir-dt-stm32mp;protocol=file;branch=v6-stm32mp"
-#SRCREV = "5ca6add7e4de2bcbbad0ff850af4d061c8f57686"
+SRC_URI = "git://github.com/MYiR-Dev/myir-st-external-dt.git;protocol=https;branch=v6-stm32mp_r3.1"
 SRCREV = "a25db88a7858f32948a4995046279d896d84e359"
 
 S = "${WORKDIR}/git"
