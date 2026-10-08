@@ -18,10 +18,12 @@ SRC_URI = "file://licenses/GPL-2 \
 	   file://usr/share/myir/Music/ \
 	   file://usr/share/myir/Capture/ \
 	   file://autorun.service \
+	   file://timesyncd-myir.conf \
           "
           
 inherit  systemd
 
+RDEPENDS:${PN} += "wayland-utils"
 RDEPENDS:${PN}:append:stm32mp25common = " myir-hmi"
 
 S = "${WORKDIR}"
@@ -36,6 +38,7 @@ do_install (){
 	install -d ${D}${datadir}/myir/Music
 	install -d ${D}${datadir}/myir/Capture
 	install -d ${D}/etc/init/
+	install -d ${D}${sysconfdir}/systemd/timesyncd.conf.d
 	install -d ${D}/usr/share/fonts/ttf/
         install -d ${D}${sbindir}
         install -d ${D}${bindir}
@@ -54,6 +57,7 @@ do_install (){
 	install -m 755 ${WORKDIR}${datadir}/myir/Capture/* ${D}${datadir}/myir/Capture
 
 	install -m 644 ${WORKDIR}/autorun.service ${D}${systemd_system_unitdir}/autorun.service
+	install -m 644 ${WORKDIR}/timesyncd-myir.conf ${D}${sysconfdir}/systemd/timesyncd.conf.d/50-myir.conf
 	
 }
 

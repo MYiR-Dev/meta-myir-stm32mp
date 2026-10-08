@@ -3,11 +3,10 @@ Description=auto run hmi after weston
 After=weston-graphical-session.service
 
 [Service]
-#Type=oneshot
-Type=forking
-#ExecCondition=/usr/bin/pgrep -x weston
+Type=simple
 ExecStart=/usr/bin/autorun.sh
-
+Restart=on-failure
+RestartSec=1s
 
 [Install]
 WantedBy=multi-user.target
