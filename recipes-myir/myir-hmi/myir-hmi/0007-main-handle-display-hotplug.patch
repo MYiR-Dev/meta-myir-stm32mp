@@ -1,0 +1,121 @@
+From 8e4e52201357a6b9e0d8bcf8627267740e50e320 Mon Sep 17 00:00:00 2001
+From: MYIR <support@myirtech.com>
+Date: Thu, 8 Oct 2026 11:30:00 +0800
+Subject: [PATCH] main: resize fullscreen window after display hotplug
+
+The Wayland window was initialized to the LVDS resolution and maximized only
+once.  When Weston replaced the 1024x600 LVDS output with a 1920x1080 HDMI
+output, the existing surface kept its old size.
+
+Let the compositor provide the fullscreen size and remap the window whenever
+Qt reports an output or output geometry change.  This keeps LVDS at its native
+1024x600 mode while allowing HDMI hotplug to use its native resolution.
+
+Upstream-Status: Inappropriate [product configuration]
+
+Signed-off-by: MYIR <support@myirtech.com>
+---
+ main.cpp | 52 ++++++++++++++++++++++++++++++++++++++++++++++++++--
+ main.qml |  8 +-------
+ 2 files changed, 51 insertions(+), 9 deletions(-)
+
+diff --git a/main.cpp b/main.cpp
+index f26a865..9af8c1d 100755
+--- a/main.cpp
++++ b/main.cpp
+@@ -22,6 +22,8 @@
+ 
+ #include <QApplication>
+ #include <QGuiApplication>
++#include <QPointer>
++#include <QScreen>
+ #include <QWindow>
+ #include <QQmlApplicationEngine>
+ #include <QFontDatabase>
+@@ -37,6 +39,38 @@
+ using namespace std;
+ using namespace MQP;
+ 
++namespace {
++constexpr int displayChangeDelayMs = 250;
++
++void scheduleFullScreen(QWindow *window, QScreen *screen)
++{
++    QPointer<QScreen> targetScreen(screen);
++
++    QTimer::singleShot(displayChangeDelayMs, window, [window, targetScreen]() {
++        if (!targetScreen)
++            return;
++
++        qInfo() << "Switching fullscreen window to" << targetScreen->name()
++                << targetScreen->geometry();
++        window->hide();
++        window->setScreen(targetScreen);
++        window->showFullScreen();
++    });
++}
++
++void watchScreenGeometry(QWindow *window, QScreen *screen)
++{
++    QObject::connect(screen, &QScreen::geometryChanged, window,
++                     [window, screen](const QRect &) {
++        scheduleFullScreen(window, screen);
++    });
++    QObject::connect(screen, &QScreen::availableGeometryChanged, window,
++                     [window, screen](const QRect &) {
++        scheduleFullScreen(window, screen);
++    });
++}
++} // namespace
++
+ void iconFontInit()
+ {
+ //
+@@ -104,8 +135,24 @@ int main(int argc, char *argv[])
+     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+     if (engine.rootObjects().isEmpty())
+         return -1;
+-    if (auto *window = qobject_cast<QWindow *>(engine.rootObjects().first()))
+-        window->showMaximized();
++    if (auto *window = qobject_cast<QWindow *>(engine.rootObjects().first())) {
++        for (QScreen *screen : QGuiApplication::screens())
++            watchScreenGeometry(window, screen);
++
++        QObject::connect(&app, &QGuiApplication::screenAdded, window,
++                         [window](QScreen *screen) {
++            watchScreenGeometry(window, screen);
++            scheduleFullScreen(window, screen);
++        });
++        QObject::connect(&app, &QGuiApplication::screenRemoved, window,
++                         [window](QScreen *) {
++            QTimer::singleShot(0, window, [window]() {
++                scheduleFullScreen(window, QGuiApplication::primaryScreen());
++            });
++        });
++
++        window->showFullScreen();
++    }
+ 
+     if (cameraSelfTest) {
+         QTimer::singleShot(1000, show_image, [show_image]() {
+diff --git a/main.qml b/main.qml
+index f39b116..b214706 100755
+--- a/main.qml
++++ b/main.qml
+@@ -147,13 +147,7 @@ ApplicationWindow {
+         settings.sync();
+         // 通用 ALSA 音量初始化（自动适配不同板子，设置所有匹配的控制名）
+         GetSystemInfo.initAlsaVolume();
+-        if(Qt.platform.pluginName === "wayland") {
+-            mainWnd.width = 1024
+-            mainWnd.height = 600
+-        }else{
+-            mainWnd.visibility =  Window.FullScreen
+-        }
+-
++        mainWnd.visibility = Window.FullScreen
+         console.log("qml platform "+Qt.platform.pluginName)
+     }
+ 
+-- 
+2.43.0
