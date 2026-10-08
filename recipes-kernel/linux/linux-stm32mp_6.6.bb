@@ -22,9 +22,9 @@ LINUX_TARNAME = "${LINUX_TARBASE}.tar.xz"
 #    file://${LINUX_VERSION}/${LINUX_VERSION}${LINUX_SUBVERSION}/0001-v6.6-stm32mp-r3.1.patch \
 #    "
 
-KERNEL_SRC_URI ?= "git:///home/myir/bsp/myir-st-linux;protocol=file;branch=develop_6.6.129"
+KERNEL_SRC_URI ?= "git://github.com/MYiR-Dev/myir-st-linux.git;protocol=https;branch=develop_6.6.129"
 SRC_URI = "${KERNEL_SRC_URI}"
-SRCREV = "7821fed4e8eb8fca0f72f53c737654420b580b64"
+SRCREV = "8758ad8f9b205a9d7204028fdc1218f87d3c75bc"
 
 SRC_URI:append:myd-lf25x = " file://${LINUX_VERSION}/0001-arm64-dts-myir-enable-cryp1.patch"
 
