@@ -1,26 +1,26 @@
-From 8e4e52201357a6b9e0d8bcf8627267740e50e320 Mon Sep 17 00:00:00 2001
+From c1103b7f247ed6d4b5a9c075f1807e21c447269b Mon Sep 17 00:00:00 2001
 From: MYIR <support@myirtech.com>
-Date: Thu, 8 Oct 2026 11:30:00 +0800
+Date: Thu, 22 Oct 2026 17:28:26 +0800
 Subject: [PATCH] main: resize fullscreen window after display hotplug
 
-The Wayland window was initialized to the LVDS resolution and maximized only
-once.  When Weston replaced the 1024x600 LVDS output with a 1920x1080 HDMI
-output, the existing surface kept its old size.
+Weston temporarily removes all outputs while switching between HDMI and LVDS.
+Coalesce Qt screen events, unmap the stale fullscreen surface, reset it to the
+new screen geometry, and remap only after the output has settled.
 
-Let the compositor provide the fullscreen size and remap the window whenever
-Qt reports an output or output geometry change.  This keeps LVDS at its native
-1024x600 mode while allowing HDMI hotplug to use its native resolution.
+Keep QML hidden until C++ performs the initial fullscreen mapping. This avoids
+competing visibility changes and keeps LVDS at 1024x600 while HDMI uses
+1920x1080.
 
 Upstream-Status: Inappropriate [product configuration]
 
 Signed-off-by: MYIR <support@myirtech.com>
 ---
- main.cpp | 52 ++++++++++++++++++++++++++++++++++++++++++++++++++--
- main.qml |  8 +-------
- 2 files changed, 51 insertions(+), 9 deletions(-)
+ main.cpp | 106 +++++++++++++++++++++++++++++++++++++++++++++++++++++--
+ main.qml |   9 +----
+ 2 files changed, 105 insertions(+), 10 deletions(-)
 
 diff --git a/main.cpp b/main.cpp
-index f26a865..9af8c1d 100755
+index 0639df0..3ac94d7 100755
 --- a/main.cpp
 +++ b/main.cpp
 @@ -22,6 +22,8 @@
@@ -32,77 +32,136 @@ index f26a865..9af8c1d 100755
  #include <QWindow>
  #include <QQmlApplicationEngine>
  #include <QFontDatabase>
-@@ -37,6 +39,38 @@
+@@ -41,6 +43,84 @@
  using namespace std;
  using namespace MQP;
  
 +namespace {
-+constexpr int displayChangeDelayMs = 250;
++constexpr int displayChangeDelayMs = 500;
++constexpr int displayRemapDelayMs = 150;
 +
-+void scheduleFullScreen(QWindow *window, QScreen *screen)
++class FullScreenSwitcher : public QObject
 +{
-+    QPointer<QScreen> targetScreen(screen);
++public:
++    explicit FullScreenSwitcher(QWindow *window)
++        : QObject(window), m_window(window)
++    {
++        m_settleTimer.setSingleShot(true);
++        m_showTimer.setSingleShot(true);
++        QObject::connect(&m_settleTimer, &QTimer::timeout, this,
++                         [this]() { apply(); });
++        QObject::connect(&m_showTimer, &QTimer::timeout, this,
++                         [this]() { show(); });
++    }
 +
-+    QTimer::singleShot(displayChangeDelayMs, window, [window, targetScreen]() {
-+        if (!targetScreen)
++    void watch(QScreen *screen)
++    {
++        QObject::connect(screen, &QScreen::geometryChanged, this,
++                         [this, screen](const QRect &) { schedule(screen); });
++        QObject::connect(screen, &QScreen::availableGeometryChanged, this,
++                         [this, screen](const QRect &) { schedule(screen); });
++    }
++
++    void schedule(QScreen *screen)
++    {
++        m_target = screen;
++        beginTransition();
++        m_settleTimer.start(displayChangeDelayMs);
++    }
++
++    void beginTransition()
++    {
++        m_settleTimer.stop();
++        m_showTimer.stop();
++        if (!m_window || !m_window->isVisible())
 +            return;
 +
-+        qInfo() << "Switching fullscreen window to" << targetScreen->name()
-+                << targetScreen->geometry();
-+        window->hide();
-+        window->setScreen(targetScreen);
-+        window->showFullScreen();
-+    });
-+}
++        m_window->hide();
++        m_window->setWindowState(Qt::WindowNoState);
++    }
 +
-+void watchScreenGeometry(QWindow *window, QScreen *screen)
-+{
-+    QObject::connect(screen, &QScreen::geometryChanged, window,
-+                     [window, screen](const QRect &) {
-+        scheduleFullScreen(window, screen);
-+    });
-+    QObject::connect(screen, &QScreen::availableGeometryChanged, window,
-+                     [window, screen](const QRect &) {
-+        scheduleFullScreen(window, screen);
-+    });
-+}
++private:
++    void apply()
++    {
++        if (!m_window || !m_target || m_target->name().isEmpty() ||
++            !m_target->geometry().isValid())
++            return;
++
++        qInfo() << "Switching fullscreen window to" << m_target->name()
++                << m_target->geometry();
++        m_window->setScreen(m_target);
++        m_window->resize(m_target->geometry().size());
++        m_showTimer.start(displayRemapDelayMs);
++    }
++
++    void show()
++    {
++        if (!m_window || !m_target || m_target->name().isEmpty() ||
++            !m_target->geometry().isValid())
++            return;
++
++        m_window->setScreen(m_target);
++        m_window->resize(m_target->geometry().size());
++        m_window->showFullScreen();
++        qInfo() << "Fullscreen window ready on" << m_target->name()
++                << m_window->size();
++    }
++
++    QPointer<QWindow> m_window;
++    QPointer<QScreen> m_target;
++    QTimer m_settleTimer;
++    QTimer m_showTimer;
++};
 +} // namespace
 +
  void iconFontInit()
  {
  //
-@@ -104,8 +135,24 @@ int main(int argc, char *argv[])
+@@ -104,8 +184,30 @@ int main(int argc, char *argv[])
      engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
      if (engine.rootObjects().isEmpty())
          return -1;
 -    if (auto *window = qobject_cast<QWindow *>(engine.rootObjects().first()))
 -        window->showMaximized();
 +    if (auto *window = qobject_cast<QWindow *>(engine.rootObjects().first())) {
++        auto *switcher = new FullScreenSwitcher(window);
 +        for (QScreen *screen : QGuiApplication::screens())
-+            watchScreenGeometry(window, screen);
++            switcher->watch(screen);
 +
-+        QObject::connect(&app, &QGuiApplication::screenAdded, window,
-+                         [window](QScreen *screen) {
-+            watchScreenGeometry(window, screen);
-+            scheduleFullScreen(window, screen);
++        QObject::connect(&app, &QGuiApplication::screenAdded, switcher,
++                         [switcher](QScreen *screen) {
++            switcher->watch(screen);
++            switcher->schedule(screen);
 +        });
-+        QObject::connect(&app, &QGuiApplication::screenRemoved, window,
-+                         [window](QScreen *) {
-+            QTimer::singleShot(0, window, [window]() {
-+                scheduleFullScreen(window, QGuiApplication::primaryScreen());
++        QObject::connect(&app, &QGuiApplication::screenRemoved, switcher,
++                         [switcher](QScreen *) {
++            switcher->beginTransition();
++            QTimer::singleShot(0, switcher, [switcher]() {
++                switcher->schedule(QGuiApplication::primaryScreen());
 +            });
 +        });
 +
++        if (QScreen *screen = QGuiApplication::primaryScreen()) {
++            window->setScreen(screen);
++            window->resize(screen->geometry().size());
++        }
 +        window->showFullScreen();
 +    }
  
      if (cameraSelfTest) {
          QTimer::singleShot(1000, show_image, [show_image]() {
 diff --git a/main.qml b/main.qml
-index f39b116..b214706 100755
+index 919da21..425eec6 100755
 --- a/main.qml
 +++ b/main.qml
-@@ -147,13 +147,7 @@ ApplicationWindow {
+@@ -31,5 +31,5 @@ import Charge104 1.0
+ import GetSystemInfoAPI 1.0
+ ApplicationWindow {
+     id: mainWnd
+-    visible: true
++    visible: false
+     title: qsTr("MXAPP2")
+@@ -147,13 +147,6 @@ ApplicationWindow {
          settings.sync();
          // 通用 ALSA 音量初始化（自动适配不同板子，设置所有匹配的控制名）
          GetSystemInfo.initAlsaVolume();
@@ -113,7 +172,6 @@ index f39b116..b214706 100755
 -            mainWnd.visibility =  Window.FullScreen
 -        }
 -
-+        mainWnd.visibility = Window.FullScreen
          console.log("qml platform "+Qt.platform.pluginName)
      }
  
