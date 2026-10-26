@@ -154,13 +154,15 @@ diff --git a/main.qml b/main.qml
 index 919da21..425eec6 100755
 --- a/main.qml
 +++ b/main.qml
-@@ -31,5 +31,5 @@ import Charge104 1.0
+@@ -31,7 +31,7 @@ import Charge104 1.0
  import GetSystemInfoAPI 1.0
  ApplicationWindow {
      id: mainWnd
 -    visible: true
 +    visible: false
      title: qsTr("MXAPP2")
+ 
+     background: Image{
 @@ -147,13 +147,6 @@ ApplicationWindow {
          settings.sync();
          // 通用 ALSA 音量初始化（自动适配不同板子，设置所有匹配的控制名）
