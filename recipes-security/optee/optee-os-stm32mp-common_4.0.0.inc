@@ -5,7 +5,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=c1f21c4f72f372ef38a5a4aee55ec173"
 
 #SRC_URI = "git://github.com/OP-TEE/optee_os.git;protocol=https;branch=master"
 SRC_URI = "git://github.com/MYiR-Dev/myir-st-optee_os.git;protocol=https;branch=develop_v4.0_r3.1"
-SRCREV = "d445bd773213b2bb26d6cb17996e040468467bcf"
+SRCREV = "6c671dbfaeb88c6f2686f693921b82420ebeea5f"
 
 SRC_URI += " \
     file://fonts.tar.gz;subdir=git;name=fonts \
